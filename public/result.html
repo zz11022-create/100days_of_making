@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Session Result</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-page="result">
@@ -11,36 +13,89 @@
     <section class="section-header">
       <div class="celebration">🎉</div>
       <h1 class="page-title">Session Complete!</h1>
-      <p class="page-subtitle">Here’s how your time with your matched cat went</p>
+      <p class="page-subtitle">Here's how your time with your matched cat went</p>
     </section>
 
+    <!-- Pet Card -->
     <section class="pet-card result-card">
       <img id="resultPetPhoto" class="pet-photo-large api-pet-photo" alt="result pet" />
-      <h2 class="pet-name">Whiskers</h2>
-      <p class="pet-type">Cat</p>
+      <h2 class="pet-name" id="resultPetName">Whiskers</h2>
+      <p class="pet-type" id="resultPetAge">Cat</p>
       <div class="result-score-box">
         <span>Compatibility</span>
         <strong id="finalScore">79%</strong>
       </div>
-      <p class="pet-description">
+      <p class="pet-description" id="resultPetDesc">
         A sophisticated feline who appreciates quiet afternoons and window-watching.
       </p>
     </section>
 
+    <!-- Shelter Info + CTA (shown when real cat data exists) -->
+    <section class="shelter-cta-card" id="shelterCtaCard" style="display:none">
+      <div class="real-cat-banner">
+        <span class="real-badge">🐾 Real Cat Available Now</span>
+      </div>
+      <div class="shelter-detail">
+        <div class="shelter-detail-name" id="resultShelterName"></div>
+        <div class="shelter-detail-city" id="resultShelterCity"></div>
+        <div class="adoption-id-box">
+          Adoption ID: <strong id="resultAdoptionId"></strong>
+        </div>
+      </div>
+      <div class="cta-buttons">
+        <button class="main-button" id="scheduleBtn">📅 Schedule a Visit</button>
+        <button class="secondary-button" id="saveProfileBtn">💾 Save My Profile</button>
+      </div>
+    </section>
+
+    <!-- Mood Map -->
     <section class="summary-card">
       <h3>Your Mood Map</h3>
       <div class="mood-map large-map" id="resultMoodMap"></div>
       <div class="mood-tags" id="moodTags"></div>
     </section>
 
+    <!-- Care Summary -->
     <section class="summary-card">
       <h3>Care Summary</h3>
       <p id="summaryText"></p>
       <div id="careList"></div>
     </section>
 
-    <a href="index.html" class="main-button">🐾 Play Again</a>
+    <div class="result-footer">
+      <a href="index.html" class="secondary-button">🐾 Try Again</a>
+    </div>
   </main>
+
+  <!-- Schedule Visit Modal -->
+  <div class="tip-overlay" id="scheduleOverlay" style="display:none">
+    <div class="tip-modal appointment-modal">
+      <h3 class="tip-title">📅 Schedule a Visit</h3>
+      <p class="tip-cat-label">
+        Visit <strong id="apptShelterName"></strong> to meet <strong id="apptCatName"></strong>
+      </p>
+      <div class="form-fields">
+        <input type="text" id="apptUserName" class="form-input" placeholder="Your Name" />
+        <input type="email" id="apptEmail" class="form-input" placeholder="Email Address" />
+        <input type="date" id="apptDate" class="form-input" />
+        <input type="time" id="apptTime" class="form-input" value="14:00" />
+      </div>
+      <div class="modal-actions">
+        <button class="secondary-button" id="apptCancel">Cancel</button>
+        <button class="main-button" id="apptConfirm">Confirm Visit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="tip-overlay" id="confirmOverlay" style="display:none">
+    <div class="tip-modal">
+      <div class="tip-icon">✅</div>
+      <h3 class="tip-title">Visit Scheduled!</h3>
+      <p class="tip-text" id="confirmText"></p>
+      <button class="main-button tip-close-btn" id="confirmClose">Wonderful!</button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>

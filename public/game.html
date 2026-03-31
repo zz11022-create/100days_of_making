@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pet Care Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body data-page="game">
@@ -22,19 +24,28 @@
       <img id="gamePetPhoto" class="pet-photo-large api-pet-photo" alt="game pet" />
       <h2 class="pet-name">Whiskers</h2>
       <p class="scene-text" id="sceneText">
-        Whiskers peeks at you from behind the door, curious but cautious...
+        Your cat peeks at you from behind the door, curious but cautious...
       </p>
     </section>
 
-    <section class="actions-grid" id="actionsGrid">
-      
-    </section>
+    <section class="actions-grid" id="actionsGrid"></section>
 
     <section class="mood-section">
       <h3>Mood Map</h3>
       <div class="mood-map" id="moodMap"></div>
     </section>
   </main>
+
+  <!-- Educational Tip Modal -->
+  <div class="tip-overlay" id="tipOverlay" style="display:none">
+    <div class="tip-modal">
+      <div class="tip-icon">💡</div>
+      <h3 class="tip-title">Cat Care Tip</h3>
+      <p class="tip-cat-label" id="tipCatLabel"></p>
+      <p class="tip-text" id="tipText"></p>
+      <button class="main-button tip-close-btn" id="tipClose">Got it, continue →</button>
+    </div>
+  </div>
 
   <script src="script.js"></script>
 </body>
