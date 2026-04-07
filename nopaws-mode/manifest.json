@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "NoPaws Mode",
+  "version": "1.0",
+  "description": "Keep curious paws off your keyboard.",
+  "permissions": ["activeTab", "storage"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "NoPaws Mode"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ]
+}

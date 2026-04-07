@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kindred Pathways</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --surface: #ffffff;
+        --surface-dim: #ffffff;
+        --surface-tint: #ffffff;
+        --tonal-shadow-sm: rgba(31, 95, 99, 0.06);
+        --tonal-shadow-md: rgba(31, 95, 99, 0.10);
+        --tonal-shadow-lg: rgba(31, 95, 99, 0.14);
+      }
+      body {
+        margin: 0;
+        font-family: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+        background: #ffffff;
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(14px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+      @keyframes shimmer {
+        0%   { background-position: -600px 0; }
+        100% { background-position:  600px 0; }
+      }
+      .page-enter {
+        animation: fadeUp 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
+      }
+      .skeleton {
+        background: linear-gradient(90deg, #eaf7ee 25%, #d8f0de 50%, #eaf7ee 75%);
+        background-size: 600px 100%;
+        animation: shimmer 1.5s ease infinite;
+        border-radius: 10px;
+      }
+      .card-surface {
+        box-shadow: 0 12px 28px #7C9B8D12;
+        border: 1px solid rgba(255,255,255,0.6);
+      }
+      .card-surface:hover {
+        box-shadow: 0 20px 34px #7C9B8D1c;
+        transform: translateY(-4px);
+      }
+      .card-surface { transition: box-shadow 0.3s cubic-bezier(0.22,1,0.36,1), transform 0.3s cubic-bezier(0.22,1,0.36,1); }
+      .factbot-panel { box-shadow: 0 20px 40px #7C9B8D20; border-radius: 32px 32px 32px 4px; }
+      .tonal-btn-primary { background: #7C9B8D; box-shadow: 0 2px 8px #7C9B8D30; transition: background 0.2s, box-shadow 0.2s, transform 0.1s; }
+      .tonal-btn-primary:hover { background: #6a8a7c; box-shadow: 0 4px 14px #7C9B8D40; }
+      .tonal-btn-primary:active { transform: scale(0.95); }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+      const { useEffect, useMemo, useState } = React;
+
+      function KindredPathways() {
+
+  const IconShield = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M12 3l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V6l7-3z" />
+      <path d="M9.5 12.5l1.7 1.7 3.8-4" />
+    </svg>
+  );
+
+  const IconCompass = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M14.8 9.2l-2.2 5.6-3.4 1.2 1.2-3.4 5.6-2.2z" />
+    </svg>
+  );
+
+  const IconMessage = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M6 18l-2 3V6a2 2 0 012-2h12a2 2 0 012 2v10a2 2 0 01-2 2H6z" />
+    </svg>
+  );
+
+  const IconArchive = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <rect x="3" y="5" width="18" height="4" rx="1" />
+      <path d="M5 9h14v9a2 2 0 01-2 2H7a2 2 0 01-2-2V9z" />
+      <path d="M10 13h4" />
+    </svg>
+  );
+
+  const IconSpark = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3z" />
+    </svg>
+  );
+
+  const IconChevron = ({ className = "h-4 w-4" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <path d="M9 6l6 6-6 6" />
+    </svg>
+  );
+
+  const IconCheckCircle = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M8.5 12.5l2.2 2.2 4.8-5" />
+    </svg>
+  );
+
+  const IconSearch = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M20 20l-4.2-4.2" />
+    </svg>
+  );
+
+  const IconClock = ({ className = "h-5 w-5" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+
+  const donorProfiles = [
+    {
+      id: 1,
+      name: "Jamie L.",
+      verified: true,
+      trust: 92,
+      vibe: 78,
+      values: ["Child-Centered Language", "Experienced OSD", "Non-Judgmental"],
+      quote:
+        "My motivation is to support a family journey with care, clarity, and long-term responsibility.",
+      summary:
+        "Open to gradual, moderated introductions and thoughtful discussion about future contact.",
+      details: "Future contact: Open to discussion · Experience: 4 years in ethical OSD communities",
+      availability: "Responds within 2–3 days",
+      reflection:
+        "I believe pace matters. I prefer to begin with written communication and clear expectations before anything more personal is discussed.",
+    },
+    {
+      id: 2,
+      name: "Alex M.",
+      verified: true,
+      trust: 88,
+      vibe: 56,
+      values: ["Child-Centered Language", "Non-Judgmental"],
+      quote:
+        "I believe donor support should center the child's future wellbeing, not speed or convenience.",
+      summary:
+        "Prefers a structured process with clear expectations and written agreements before connection.",
+      details: "Future contact: Selective · Experience: Background in peer support and open communication",
+      availability: "Responds within 1 week",
+      reflection:
+        "I try to be very thoughtful about language, future contact, and what ethical openness can look like in practice.",
+    },
+    {
+      id: 3,
+      name: "Robin S.",
+      verified: false,
+      trust: 74,
+      vibe: 34,
+      values: ["Experienced OSD"],
+      quote:
+        "I want to be helpful, but I'm still defining what the right level of future contact looks like.",
+      summary:
+        "Would benefit from slower pacing and platform guidance before any connection moves forward.",
+      details: "Future contact: Not yet defined · Experience: Some prior donor conversations",
+      availability: "Response timing not yet established",
+      reflection:
+        "I am still learning how to articulate future contact in a way that is respectful and sustainable.",
+    },
+  ];
+
+  const factbotFaq = [
+    {
+      q: "Is AI as effective as NI?",
+      a:
+        "This platform does not frame conception methods as quick comparisons. FACTbot encourages users to review medical, legal, and emotional implications with licensed professionals and trusted guidance.",
+    },
+    {
+      q: "Should I conceive with a donor who is much older?",
+      a:
+        "Age-related questions can involve medical and family-planning considerations. FACTbot can summarize general guidance, but important decisions should be reviewed with a fertility specialist.",
+    },
+    {
+      q: "How much future contact should be discussed early?",
+      a:
+        "Research-informed best practice is to discuss expectations gradually but clearly. Early clarity can reduce misunderstanding, while moderated pacing helps maintain psychological safety.",
+    },
+    {
+      q: "What does child-centered language mean here?",
+      a:
+        "It means speaking in a way that centers the future child's dignity, wellbeing, and long-term identity needs, rather than treating donation as a transaction.",
+    },
+  ];
+
+  const [page, setPage] = useState("home");
+  const [pageKey, setPageKey] = useState(0);
+  const [isFiltering, setIsFiltering] = useState(false);
+  const [agreed, setAgreed] = useState(false);
+  const [vibe, setVibe] = useState(62);
+  const [selectedValues, setSelectedValues] = useState([
+    "Child-Centered Language",
+    "Non-Judgmental",
+  ]);
+  const [verifiedOnly, setVerifiedOnly] = useState(true);
+  const [showTips, setShowTips] = useState(true);
+  const [showResearch, setShowResearch] = useState(false);
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [factbotOpen, setFactbotOpen] = useState(false);
+  const [factbotInput, setFactbotInput] = useState("");
+  const [factbotThread, setFactbotThread] = useState([
+    {
+      role: "bot",
+      text:
+        "Hello — I'm FACTbot. I can help summarize general guidance, explain safety language, and point you toward thoughtful next questions.",
+    },
+  ]);
+  const [selectedProfileId, setSelectedProfileId] = useState(1);
+
+  const pageMeta = {
+    home: {
+      label: "Gateway",
+      description: "Entry, trust alignment, and community code of conduct",
+      icon: IconShield,
+      status: "Entry Ready",
+    },
+    explore: {
+      label: "Explore",
+      description: "Recipient safe exploration and truth-centered filtering",
+      icon: IconCompass,
+      status: "Protected Search",
+    },
+    chat: {
+      label: "Moderated Chat",
+      description: "Structured first contact with active safety guardrails",
+      icon: IconMessage,
+      status: "Session Moderated",
+    },
+    dashboard: {
+      label: "Legacy Dashboard",
+      description: "Donor reflection, record systems, and accountability",
+      icon: IconArchive,
+      status: "Verified Workspace",
+    },
+  };
+
+  const maxChars = 200;
+
+  const sectionEyebrow = "text-[11px] font-medium uppercase tracking-[0.22em] text-neutral-400";
+  const pageTitle = "text-[2.75rem] md:text-[3.1rem] leading-[0.95] font-semibold tracking-[-0.06em] text-neutral-950";
+  const sectionTitle = "text-[2rem] md:text-[2.25rem] leading-[1] font-semibold tracking-[-0.05em] text-neutral-950";
+  const cardTitle = "text-[1.15rem] font-semibold tracking-[-0.03em] text-neutral-950";
+  const bodyText = "text-sm leading-7 text-neutral-500";
+  const surfaceCard = "card-surface rounded-[28px] bg-white";
+  const softPanel = "rounded-[24px] bg-white";
+  const inputSurface = "rounded-[20px] border border-black/6 bg-white";
+
+  function toggleValue(value) {
+    setSelectedValues((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value]
+    );
+  }
+
+  const filteredProfiles = useMemo(() => {
+    return donorProfiles.filter((profile) => {
+      const matchVerification = verifiedOnly ? profile.verified : true;
+      const matchVibe = Math.abs(profile.vibe - vibe) <= 35;
+      const matchValues = selectedValues.every((value) => profile.values.includes(value));
+      return matchVerification && matchVibe && matchValues;
+    });
+  }, [vibe, selectedValues, verifiedOnly]);
+
+  const selectedProfile = donorProfiles.find((p) => p.id === selectedProfileId) || donorProfiles[0];
+
+  useEffect(() => {
+    if (page !== "chat") return;
+    if (!donorProfiles.find((p) => p.id === selectedProfileId)) {
+      setSelectedProfileId(1);
+    }
+  }, [page, selectedProfileId]);
+
+  useEffect(() => {
+    setIsFiltering(true);
+    const t = setTimeout(() => setIsFiltering(false), 350);
+    return () => clearTimeout(t);
+  }, [vibe, selectedValues, verifiedOnly]);
+
+  function sendMessage() {
+    if (!message.trim()) return;
+    setMessages((prev) => [
+      ...prev,
+      {
+        id: Date.now(),
+        author: "You",
+        text: message.trim(),
+        time: "10:42 AM",
+      },
+    ]);
+    setMessage("");
+  }
+
+  function handleFactbotQuestion(text) {
+    if (!text.trim()) return;
+    const lower = text.toLowerCase();
+    let response =
+      "I can help with safety language, future-contact expectations, and general questions about respectful donor-recipient communication. For medical or legal decisions, I recommend consulting a qualified professional.";
+
+    if (lower.includes("future contact") || lower.includes("contact")) {
+      response =
+        "A good starting point is gradual clarity: discuss expectations early enough to avoid confusion, but at a pace that protects both people from pressure. Moderated communication can help make that possible.";
+    } else if (lower.includes("child-centered") || lower.includes("language")) {
+      response =
+        "Child-centered language focuses on the future child's identity, dignity, and wellbeing. It avoids transactional wording and helps keep the conversation ethically grounded.";
+    } else if (lower.includes("verified") || lower.includes("proveurreal") || lower.includes("safety")) {
+      response =
+        "Verification signals increase accountability, but they are only one layer of safety. Respectful pacing, reporting tools, clear boundaries, and moderation remain essential.";
+    } else if (lower.includes("ni") || lower.includes("medical") || lower.includes("age")) {
+      response =
+        "That question touches on medical risk and personal circumstances. I can summarize general considerations, but final decisions should be reviewed with a licensed clinician or counselor.";
+    }
+
+    setFactbotThread((prev) => [
+      ...prev,
+      { role: "user", text: text.trim() },
+      { role: "bot", text: response },
+    ]);
+    setFactbotInput("");
+  }
+
+  const TopMetaBar = () => {
+    const meta = pageMeta[page];
+    const PageIcon = meta.icon;
+    return (
+      <div className="border-b border-black/5 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-8 py-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 text-xs text-neutral-400">
+              <span>Kindred Pathways</span>
+              <IconChevron className="h-3.5 w-3.5" />
+              <span className="text-neutral-500">{meta.label}</span>
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[#7C9B8D]">
+                <PageIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-[1.15rem] font-semibold tracking-[-0.03em] text-neutral-950">{meta.label}</div>
+                <div className="text-sm text-neutral-500">{meta.description}</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-medium text-neutral-600">
+              <IconCheckCircle className="h-4 w-4 text-[#7C9B8D]" />
+              {meta.status}
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-medium text-neutral-600">
+              <IconShield className="h-4 w-4 text-[#7C9B8D]" />
+              Safety System Active
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const navButton = (target, label, IconComp) => (
+    <button
+      onClick={() => { setPage(target); setPageKey((k) => k + 1); }}
+      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm transition-all duration-200 active:scale-95 ${
+        page === target
+          ? "border border-[#7C9B8D]/20 bg-[#7C9B8D] text-white"
+          : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-950"
+      }`}
+    >
+      <IconComp className="h-4 w-4" />
+      {label}
+    </button>
+  );
+
+  const Panel = ({ className = "", children }) => <div className={`${surfaceCard} ${className}`}>{children}</div>;
+  const SoftBox = ({ className = "", children }) => <div className={`${softPanel} ${className}`}>{children}</div>;
+
+  const ResultCard = ({ profile }) => (
+    <Panel className="group p-7">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <div className={cardTitle}>{profile.name}</div>
+            <span className={`rounded-full px-3 py-1 text-[11px] font-medium transition-all duration-200 ${
+              profile.verified
+                ? "bg-white text-[#5e8878] group-hover:shadow-[0_0_0_3px_#7C9B8D38]"
+                : "bg-neutral-100 text-neutral-500"
+            }`}>
+              {profile.verified ? "#PROVEURREAL Verified" : "Verification pending"}
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {profile.values.map((value) => (
+              <span key={value} className="rounded-full border border-black/8 bg-white px-3 py-1 text-[11px] text-neutral-500">
+                {value}
+              </span>
+            ))}
+          </div>
+        </div>
+        <SoftBox className="min-w-[96px] px-3 py-3 text-center">
+          <div className="text-[11px] uppercase tracking-[0.14em] text-neutral-400">Trust</div>
+          <div className="mt-1 text-xl font-semibold text-neutral-950">{profile.trust}</div>
+        </SoftBox>
+      </div>
+
+      <SoftBox className="mt-6 p-5 bg-[#E8F5EE]">
+        <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-400">My motivation is…</div>
+        <blockquote style={{ fontFamily: "'Playfair Display', Georgia, serif" }} className="text-[1.05rem] italic leading-8 text-neutral-700">"{profile.quote}"</blockquote>
+      </SoftBox>
+
+      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_auto]">
+        <div>
+          <p className={bodyText}>{profile.summary}</p>
+          <div className="mt-3 text-xs leading-[1.75] text-neutral-400">{profile.details}</div>
+        </div>
+        <div className={`${inputSurface} px-4 py-3 text-xs leading-6 text-neutral-500`}>
+          <div className="flex items-center gap-2 font-medium text-neutral-700">
+            <IconClock className="h-4 w-4 text-[#7C9B8D]" />
+            Response style
+          </div>
+          <div>{profile.availability}</div>
+        </div>
+      </div>
+
+      <div className="mt-6 flex items-center justify-between gap-4 border-t border-black/6 pt-5">
+        <button
+          onClick={() => {
+            setSelectedProfileId(profile.id);
+            setPage("chat");
+            setPageKey((k) => k + 1);
+          }}
+          className="rounded-full bg-[#7C9B8D] px-6 py-3 text-sm font-medium text-white shadow-md transition-all duration-200 hover:bg-[#6a8a7c] hover:shadow-lg active:scale-95"
+        >
+          Request Moderated Connection
+        </button>
+        <button className="text-sm font-medium text-neutral-500 underline underline-offset-4 transition-colors duration-150 hover:text-neutral-800">
+          View reflection notes
+        </button>
+      </div>
+    </Panel>
+  );
+
+  return (
+    <div className="min-h-screen bg-white text-neutral-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+      <div className="sticky top-0 z-30 border-b border-black/6 bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-5">
+          <div>
+            <div className="text-[1.15rem] font-semibold tracking-[-0.03em] text-neutral-950">Kindred Pathways</div>
+            <div className="text-xs text-neutral-400">Psychologically safe family-building platform concept</div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            {navButton("home", "Gateway", IconShield)}
+            {navButton("explore", "Explore", IconCompass)}
+            {navButton("chat", "Chat", IconMessage)}
+            {navButton("dashboard", "Donor Dashboard", IconArchive)}
+          </div>
+        </div>
+      </div>
+
+      <TopMetaBar />
+
+      {page === "home" && (
+        <div key={pageKey} className="page-enter mx-auto max-w-7xl px-8 py-12">
+          <Panel className="p-10 lg:p-14">
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2 text-xs font-medium tracking-[0.14em] text-[#5e8878]">
+                <IconSpark className="h-4 w-4" />
+                TRUST · TRANSPARENCY · MODERATION
+              </div>
+              <h1 className={pageTitle}>Kindred Pathways: A Safeguarded Path to Family</h1>
+              <p className="mx-auto mt-5 max-w-2xl text-base leading-8 text-neutral-500">
+                Designed for sensitive, ethical connection. This experience supports recipient families and donors through guided,
+                non-commercial, psychologically safe interaction.
+              </p>
+            </div>
+
+            <div className="mt-12 grid gap-6 lg:grid-cols-2">
+              <button
+                disabled={!agreed}
+                onClick={() => setPage("explore")}
+                className={`rounded-[28px] p-8 text-left transition ${
+                  agreed
+                    ? "border border-black/6 bg-white shadow-[0_10px_24px_#00000008] hover:-translate-y-1"
+                    : "cursor-not-allowed bg-neutral-100 text-neutral-400"
+                }`}
+              >
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#7C9B8D]">
+                  <IconCompass className="h-6 w-6" />
+                </div>
+                <div className={sectionEyebrow}>Recipient Portal</div>
+                <div className="mt-2 text-[2rem] leading-[1] font-semibold tracking-[-0.05em] text-neutral-950">I am looking to GROW my family</div>
+                <p className="mt-4 max-w-md text-sm leading-7 text-neutral-500">
+                  Explore profiles with guided filters, moderated pathways, and transparent safeguards that protect identity,
+                  dignity, and emotional readiness.
+                </p>
+              </button>
+
+              <button
+                disabled={!agreed}
+                onClick={() => setPage("dashboard")}
+                className={`rounded-[28px] p-8 text-left transition ${
+                  agreed
+                    ? "border border-black/6 bg-white shadow-[0_10px_24px_#00000008] hover:-translate-y-1"
+                    : "cursor-not-allowed bg-neutral-100 text-neutral-400"
+                }`}
+              >
+                <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#7C9B8D]">
+                  <IconArchive className="h-6 w-6" />
+                </div>
+                <div className={sectionEyebrow}>Donor Portal</div>
+                <div className="mt-2 text-[2rem] leading-[1] font-semibold tracking-[-0.05em] text-neutral-950">I am looking to HELP grow a family</div>
+                <p className="mt-4 max-w-md text-sm leading-7 text-neutral-500">
+                  Enter a responsibility-led space that emphasizes future-oriented communication, ethical transparency,
+                  and shared accountability.
+                </p>
+              </button>
+            </div>
+
+            <SoftBox className="mx-auto mt-10 max-w-4xl p-6">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <label className="flex items-start gap-3 text-sm leading-7 text-neutral-600">
+                  <input
+                    type="checkbox"
+                    checked={agreed}
+                    onChange={() => setAgreed(!agreed)}
+                    className="mt-1 h-4 w-4 rounded border-neutral-300 accent-[#7C9B8D]"
+                  />
+                  <span>
+                    <span className="font-semibold text-neutral-950">Community Code of Conduct:</span> I agree to build trust,
+                    respect identities, and communicate without bullying or stigma.
+                    <button className="ml-2 font-medium text-neutral-950 underline underline-offset-4">Read Full Code</button>
+                  </span>
+                </label>
+                <div className="rounded-full bg-white px-4 py-2 text-xs font-medium tracking-[0.12em] text-neutral-500 border border-black/6">
+                  REQUIRED BEFORE ENTRY
+                </div>
+              </div>
+            </SoftBox>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-3">
+              {[
+                ["Encrypted by design", "Identity-sensitive details remain protected until mutual, moderated consent."],
+                ["Structured moderation", "All early-stage communication is framed with safety guardrails and reporting tools."],
+                ["Verification standards", "Visible trust markers reinforce accountability without commodifying people."],
+              ].map(([title, body]) => (
+                <SoftBox key={title} className="p-6">
+                  <div className={cardTitle}>{title}</div>
+                  <div className="mt-2 text-sm leading-6 text-neutral-500">{body}</div>
+                </SoftBox>
+              ))}
+            </div>
+          </Panel>
+        </div>
+      )}
+
+      {page === "explore" && (
+        <div key={pageKey} className="page-enter mx-auto flex max-w-7xl gap-6 px-8 py-10">
+          <Panel className="h-fit w-full max-w-[320px] p-6">
+            <div className={`flex items-center gap-2 ${sectionEyebrow}`}>
+              <IconSearch className="h-4 w-4 text-[#7C9B8D]" />
+              Safe Search
+            </div>
+            <h2 className={`mt-2 ${sectionTitle}`}>Recipient Safe Exploration</h2>
+            <p className={`mt-2 ${bodyText}`}>
+              Use filters that reflect communication style, values, and verification — not marketplace-style ranking.
+            </p>
+
+            <SoftBox className="mt-7 p-5">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium text-neutral-800">Vibe Slider</label>
+                <span className="rounded-full bg-white px-3 py-1 text-xs text-neutral-500 border border-black/6">{vibe < 50 ? "More private" : "More open"}</span>
+              </div>
+              <div className="mt-4 rounded-full bg-[#ddeae5] p-3">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={vibe}
+                  onChange={(e) => setVibe(Number(e.target.value))}
+                  className="w-full accent-[#7C9B8D]"
+                />
+              </div>
+              <div className="mt-2 flex justify-between text-xs text-neutral-400">
+                <span>Completely Anonymous</span>
+                <span>Open-ID / Future Contact</span>
+              </div>
+            </SoftBox>
+
+            <SoftBox className="mt-7 p-5">
+              <div className="text-sm font-medium text-neutral-800">Values Filter</div>
+              <div className="mt-3 space-y-3 text-sm text-neutral-700">
+                {[
+                  "Child-Centered Language",
+                  "Experienced OSD",
+                  "Non-Judgmental",
+                ].map((value) => (
+                  <label key={value} className={`${inputSurface} flex items-center gap-3 px-4 py-3`}>
+                    <input
+                      type="checkbox"
+                      checked={selectedValues.includes(value)}
+                      onChange={() => toggleValue(value)}
+                      className="accent-[#7C9B8D]"
+                    />
+                    <span>{value}</span>
+                  </label>
+                ))}
+              </div>
+            </SoftBox>
+
+            <SoftBox className="mt-7 p-5">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className="text-sm font-medium text-neutral-800">Verification Shield</div>
+                  <div className="mt-1 text-xs leading-5 text-neutral-500">Show only #PROVEURREAL verified profiles</div>
+                </div>
+                <button
+                  onClick={() => setVerifiedOnly(!verifiedOnly)}
+                  className={`relative h-7 w-12 rounded-full transition ${verifiedOnly ? "bg-[#7C9B8D]" : "bg-neutral-200"}`}
+                >
+                  <span className={`absolute top-1 h-5 w-5 rounded-full bg-white transition ${verifiedOnly ? "left-6" : "left-1"}`} />
+                </button>
+              </div>
+            </SoftBox>
+          </Panel>
+
+          <main className="flex-1">
+            <div className="mb-6 flex items-end justify-between gap-4">
+              <div>
+                <div className={sectionEyebrow}>Truth Center</div>
+                <h2 className={`mt-2 ${pageTitle}`}>Profiles shaped by intent, not transaction</h2>
+                <p className={`mt-2 max-w-3xl ${bodyText}`}>
+                  The interface highlights reflective motivation, communication posture, and verification status before any personal details.
+                </p>
+              </div>
+              <div className="rounded-full border border-black/8 bg-white px-4 py-2 text-sm text-neutral-600">
+                {filteredProfiles.length} thoughtful match{filteredProfiles.length === 1 ? "" : "es"}
+              </div>
+            </div>
+
+            {isFiltering ? (
+              <div className="grid gap-5 xl:grid-cols-2">
+                {[1, 2].map((i) => (
+                  <div key={i} className="card-surface rounded-[28px] bg-white p-7">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 space-y-3">
+                        <div className="skeleton h-5 w-1/3" />
+                        <div className="skeleton h-4 w-2/3" />
+                        <div className="flex gap-2">
+                          <div className="skeleton h-6 w-24" />
+                          <div className="skeleton h-6 w-20" />
+                        </div>
+                      </div>
+                      <div className="skeleton h-16 w-24 rounded-[24px]" />
+                    </div>
+                    <div className="skeleton mt-6 h-28 w-full rounded-[24px]" />
+                    <div className="mt-5 space-y-2">
+                      <div className="skeleton h-4 w-full" />
+                      <div className="skeleton h-4 w-5/6" />
+                    </div>
+                    <div className="skeleton mt-6 h-10 w-48 rounded-full" />
+                  </div>
+                ))}
+              </div>
+            ) : filteredProfiles.length === 0 ? (
+              <Panel className="flex min-h-[420px] items-center justify-center p-10 text-center">
+                <div className="max-w-xl">
+                  <svg className="mx-auto mb-6 h-36 w-36 text-[#a8c5ba]" viewBox="0 0 120 120" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="50" cy="46" r="26" />
+                    <path d="M68 66l18 18" strokeWidth="2" />
+                    <path d="M38 42c3-7 11-10 14-7" />
+                    <path d="M40 54c2 3 8 5 11 3" />
+                    <circle cx="88" cy="28" r="10" opacity="0.45" />
+                    <path d="M83 24c2-4 6-5 8-3" opacity="0.45" />
+                    <path d="M83 32c2 3 6 3 8 1" opacity="0.45" />
+                    <path d="M20 90c8-4 18-6 28-5" opacity="0.3" />
+                    <path d="M60 92c6 0 12 1 16 3" opacity="0.3" />
+                  </svg>
+                  <h3 className={sectionTitle}>Still exploring the best possible fit</h3>
+                  <p className="mt-4 text-base leading-8 text-neutral-500">
+                    Try adjusting the Vibe Slider or broadening your Values Filter to discover more profiles.
+                  </p>
+                </div>
+              </Panel>
+            ) : (
+              <div className="grid gap-5 xl:grid-cols-2">
+                {filteredProfiles.map((profile) => (
+                  <ResultCard key={profile.id} profile={profile} />
+                ))}
+              </div>
+            )}
+          </main>
+        </div>
+      )}
+
+      {page === "chat" && (
+        <div key={pageKey} className="page-enter mx-auto max-w-7xl px-8 py-10">
+          <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+            <Panel className="p-6">
+              <div className={sectionEyebrow}>Connection Partner</div>
+              <h2 className={`mt-2 ${sectionTitle}`}>{selectedProfile.name}</h2>
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-xs font-medium text-[#5e8878]">
+                {selectedProfile.verified ? "#PROVEURREAL: Verified ID" : "Verification pending"}
+              </div>
+
+              <SoftBox className="mt-5 p-4">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Profile reflection</div>
+                <p className={`mt-3 ${bodyText}`}>{selectedProfile.reflection}</p>
+              </SoftBox>
+
+              <SoftBox className="mt-5 p-4">
+                <div className={cardTitle}>Shared safety foundation</div>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-neutral-500">
+                  <li>• Early messages are moderated</li>
+                  <li>• Identity details remain protected</li>
+                  <li>• Pressure, bullying, or harassment are not tolerated</li>
+                </ul>
+              </SoftBox>
+            </Panel>
+
+            <Panel className="relative flex min-h-[700px] flex-col overflow-hidden">
+              <div className="flex items-center justify-between gap-4 border-b border-black/6 bg-white px-6 py-4">
+                <div>
+                  <div className="text-sm font-semibold tracking-[0.08em] text-neutral-700">MODERATED SESSION</div>
+                  <div className="text-sm text-neutral-500">Our team ensures a safe, respectful environment.</div>
+                </div>
+                <button className={`${inputSurface} bg-white px-4 py-2 text-sm font-medium text-neutral-700`}>
+                  REPORT USER
+                </button>
+              </div>
+
+              <div className="flex-1 overflow-y-auto bg-white px-6 py-6">
+                {messages.length === 0 && (
+                  <SoftBox className="mb-6 p-5">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <div className="text-sm font-semibold uppercase tracking-[0.14em] text-neutral-500">Icebreaker Guide</div>
+                        <p className={`mt-3 ${bodyText}`}>
+                          To make the first conversation feel gentler, you might begin by sharing what kind of connection you hope to build,
+                          asking what pace feels comfortable, or naming any boundaries that help you feel safe.
+                        </p>
+                      </div>
+                      <div className={`${inputSurface} hidden h-12 w-12 items-center justify-center bg-white text-[#7C9B8D] md:flex`}>
+                        <IconMessage className="h-6 w-6" />
+                      </div>
+                    </div>
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      {[
+                        "What kind of communication pace feels best for you right now?",
+                        "Would you like to share what respectful future contact means to you?",
+                        "Is there anything that would help this conversation feel more comfortable today?",
+                      ].map((tip) => (
+                        <button
+                          key={tip}
+                          onClick={() => setMessage(tip)}
+                          className={`${inputSurface} p-4 text-left text-sm leading-6 text-neutral-600`}
+                        >
+                          {tip}
+                        </button>
+                      ))}
+                    </div>
+                  </SoftBox>
+                )}
+
+                {messages.length === 0 ? (
+                  <div className="rounded-[24px] border border-dashed border-black/10 bg-white p-8 text-center text-neutral-400">
+                    No messages yet. This space is ready when both people are prepared to begin thoughtfully.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {messages.map((item) => (
+                      <SoftBox key={item.id} className="ml-auto max-w-[72%] px-5 py-4">
+                        <div className="text-sm leading-7 text-neutral-700">{item.text}</div>
+                        <div className="mt-2 text-right text-xs text-neutral-400">{item.author} · {item.time}</div>
+                      </SoftBox>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="border-t border-black/6 bg-white px-6 py-4">
+                <div className="flex items-end gap-3">
+                  <div className={`${inputSurface} flex-1 px-4 py-3`}>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div className="text-xs font-medium uppercase tracking-[0.14em] text-neutral-400">Message thoughtfully</div>
+                      <div className="group relative flex items-center gap-2 text-xs text-neutral-400">
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full border border-neutral-300">i</span>
+                        <div className="pointer-events-none absolute bottom-7 right-0 w-72 rounded-2xl bg-black p-3 text-left text-xs leading-5 text-white opacity-0 shadow-lg transition group-hover:opacity-100">
+                          Our platform champions respect. Bullying or harassment will result in immediate suspension.
+                        </div>
+                      </div>
+                    </div>
+                    <textarea
+                      value={message}
+                      maxLength={maxChars}
+                      onChange={(e) => setMessage(e.target.value)}
+                      placeholder="Write your message in a calm, respectful tone..."
+                      className="h-24 w-full resize-none bg-transparent text-sm leading-7 text-neutral-700 outline-none placeholder:text-neutral-400"
+                    />
+                    <div className="mt-2 text-right text-xs text-neutral-400">{message.length}/{maxChars}</div>
+                  </div>
+                  <button
+                    onClick={sendMessage}
+                    className="rounded-full bg-[#7C9B8D] px-5 py-3 text-sm font-medium text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+                  >
+                    Send
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowTips(!showTips)}
+                className={`${inputSurface} absolute right-5 top-24 bg-white px-4 py-2 text-xs font-medium text-neutral-600`}
+              >
+                {showTips ? "Hide Tips" : "Conversation Tips"}
+              </button>
+
+              {showTips && (
+                <Panel className="absolute right-5 top-36 w-72 p-5 shadow-[0_10px_24px_#0000000a]">
+                  <div className={cardTitle}>Child-Centered Language Guide</div>
+                  <ul className="mt-3 space-y-2 text-sm leading-6 text-neutral-500">
+                    <li>• Speak about future contact with clarity, not pressure.</li>
+                    <li>• Use respectful, non-transactional language.</li>
+                    <li>• Center the future child's wellbeing in the conversation.</li>
+                  </ul>
+                </Panel>
+              )}
+            </Panel>
+          </div>
+        </div>
+      )}
+
+      {page === "dashboard" && (
+        <div key={pageKey} className="page-enter mx-auto max-w-7xl px-8 py-10">
+          <div className="mb-6">
+            <div className={sectionEyebrow}>Legacy Builder</div>
+            <h2 className={`mt-2 ${pageTitle}`}>Donor responsibility dashboard</h2>
+            <p className={`mt-2 max-w-3xl ${bodyText}`}>
+              This space is designed to reinforce thoughtful participation, long-term responsibility, and transparent records.
+            </p>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            {[
+              ["Active Connection Requests", "2", "Two recipient-led requests are awaiting your careful review."],
+              ["Profile Status", "Verified", "Your identity has passed platform verification standards."],
+              ["Legacy Tracker", "67%", "Key reflective sections are nearly complete for future-oriented matching."],
+            ].map(([title, stat, body]) => (
+              <Panel key={title} className="p-6">
+                <div className="text-sm text-neutral-400">{title}</div>
+                <div className="mt-2 text-3xl font-semibold tracking-[-0.03em] text-neutral-950">{stat}</div>
+                <div className="mt-3 text-sm leading-6 text-neutral-500">{body}</div>
+              </Panel>
+            ))}
+          </div>
+
+          <div className="mt-6 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+            <Panel className="p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <div className={cardTitle}>My Connection Narrative</div>
+                  <div className="mt-1 text-sm text-neutral-500">Guided reflection for ethical, future-aware donor participation.</div>
+                </div>
+                <button
+                  onClick={() => setShowResearch(!showResearch)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium ${
+                    showResearch ? "bg-[#7C9B8D] text-white" : "bg-white text-neutral-700"
+                  }`}
+                >
+                  {showResearch ? "Hide OSDP Best Practices" : "Show OSDP Research Best Practices"}
+                </button>
+              </div>
+
+              <div className="mt-6 space-y-5">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-neutral-800">My vision for future contact</label>
+                  <textarea
+                    className={`${inputSurface} h-32 w-full p-4 text-sm leading-7 text-neutral-700 outline-none`}
+                    placeholder="Describe how you imagine communication evolving over time, and what you believe creates a respectful foundation."
+                  />
+                </div>
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-neutral-800">Advice for the future child</label>
+                  <textarea
+                    className={`${inputSurface} h-32 w-full p-4 text-sm leading-7 text-neutral-700 outline-none`}
+                    placeholder="Write a future-oriented message that reflects care, honesty, and responsibility."
+                  />
+                </div>
+              </div>
+
+              {showResearch && (
+                <SoftBox className="mt-6 p-5 bg-[#E8F5EE]">
+                  <div className={cardTitle}>OSDP Research Best Practices</div>
+                  <div className="mt-3 grid gap-3 text-sm leading-6 text-neutral-500 md:grid-cols-2">
+                    <div className={`${inputSurface} bg-white p-4`}>Healthy open-donation pathways often benefit from clear early expectations and slower, consent-based communication.</div>
+                    <div className={`${inputSurface} bg-white p-4`}>Profiles that use child-centered language tend to support more reflective and ethically grounded matching decisions.</div>
+                    <div className={`${inputSurface} bg-white p-4`}>Documentation and transparency can reduce confusion, protect participants, and support long-term accountability.</div>
+                    <div className={`${inputSurface} bg-white p-4`}>Moderated spaces help reduce harmful pressure and create a safer starting point for sensitive conversations.</div>
+                  </div>
+                </SoftBox>
+              )}
+            </Panel>
+
+            <Panel className="p-6">
+              <div className={cardTitle}>Activity Audit (The Record System)</div>
+              <p className={`mt-2 ${bodyText}`}>
+                Searches and interactions are logged to reinforce responsibility, transparency, and ethical participation.
+              </p>
+
+              <div className={`mt-5 overflow-hidden ${inputSurface}`}>
+                <div className="grid grid-cols-[1fr_1.2fr_1fr] bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-neutral-400">
+                  <div>Time</div>
+                  <div>Activity</div>
+                  <div>Status</div>
+                </div>
+                {[
+                  ["09:12", "Viewed recipient-led connection request", "Completed"],
+                  ["09:47", "Updated future-contact narrative", "Saved"],
+                  ["10:05", "Reviewed child-centered language guidance", "Viewed"],
+                  ["10:24", "Verified profile acknowledgement", "Completed"],
+                ].map(([time, activity, status]) => (
+                  <div key={time + activity} className="grid grid-cols-[1fr_1.2fr_1fr] border-t border-black/6 px-4 py-4 text-sm text-neutral-600">
+                    <div>{time}</div>
+                    <div>{activity}</div>
+                    <div className="font-medium text-neutral-800">{status}</div>
+                  </div>
+                ))}
+              </div>
+            </Panel>
+          </div>
+        </div>
+      )}
+
+      {(page === "explore" || page === "chat") && (
+        <>
+          <button
+            onClick={() => setFactbotOpen(!factbotOpen)}
+            className="fixed bottom-7 right-7 z-40 rounded-full bg-[#7C9B8D] px-5 py-4 text-sm font-medium text-white shadow-[0_12px_24px_#0000001f] transition-all duration-200 hover:opacity-90 active:scale-95"
+          >
+            FACTbot: Ask an Expert AI
+          </button>
+
+          {factbotOpen && (
+            <div className="factbot-panel fixed bottom-24 right-7 z-40 flex h-[560px] w-[380px] flex-col overflow-hidden border border-black/6 bg-white">
+              <div className="flex items-center justify-between border-b border-amber-100 bg-amber-50 px-5 py-4">
+                <div>
+                  <div className="flex items-center gap-2 text-sm font-semibold text-neutral-950">
+                    <IconSpark className="h-4 w-4 text-[#7C9B8D]" />
+                    FACTbot
+                  </div>
+                  <div className="text-xs text-neutral-500">General guidance, respectful language, and safety prompts</div>
+                </div>
+                <button
+                  onClick={() => setFactbotOpen(false)}
+                  className={`${inputSurface} bg-white px-3 py-1 text-xs text-neutral-500`}
+                >
+                  Close
+                </button>
+              </div>
+
+              <div className="border-b border-black/6 px-5 py-4">
+                <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-neutral-400">Suggested questions</div>
+                <div className="flex flex-wrap gap-2">
+                  {factbotFaq.map((item) => (
+                    <button
+                      key={item.q}
+                      onClick={() => handleFactbotQuestion(item.q)}
+                      className={`${inputSurface} bg-white px-3 py-2 text-xs text-neutral-600`}
+                    >
+                      {item.q}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4 bg-white">
+                {factbotThread.map((item, index) => (
+                  <div
+                    key={item.role + index}
+                    className={
+                      item.role === "bot"
+                        ? `${inputSurface} mr-8 bg-white p-4 text-sm leading-7 text-neutral-600`
+                        : `${softPanel} ml-8 p-4 text-sm leading-7 text-neutral-700`
+                    }
+                  >
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+
+              <div className="border-t border-black/6 bg-white px-5 py-4">
+                <div className={`${inputSurface} p-3`}>
+                  <textarea
+                    value={factbotInput}
+                    onChange={(e) => setFactbotInput(e.target.value)}
+                    placeholder="Ask about safety language, future contact, or respectful communication..."
+                    className="h-20 w-full resize-none bg-transparent text-sm leading-7 text-neutral-700 outline-none placeholder:text-neutral-400"
+                  />
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3">
+                  <div className="text-xs leading-5 text-neutral-400">FACTbot provides general guidance and does not replace medical or legal advice.</div>
+                  <button
+                    onClick={() => handleFactbotQuestion(factbotInput)}
+                    className="rounded-full bg-[#7C9B8D] px-4 py-2 text-sm font-medium text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+                  >
+                    Ask
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
+
+      const root = ReactDOM.createRoot(document.getElementById("root"));
+      root.render(<KindredPathways />);
+    </script>
+  </body>
+</html>
