@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Remix: Scroll-based 3D Website</title>
+  <style>
+    * { margin: 0; padding: 0; outline: none !important; box-sizing: border-box; }
+    canvas { display: block; outline: none !important; }
+  </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --cream: #f5f0ebf0;
+      --cream-dim: #f5f0eb66;
+      --dark: #1a1412;
+      --accent: #8b6f5c;
+      --accent-light: #c4a882;
+      --cream-bright: #faf7f4;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+    }
+
+    body {
+      background: #ae889e;
+      color: var(--cream);
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Splash ── */
+    .splash {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      scroll-snap-align: start;
+    }
+
+    .splash .overline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.7rem;
+      font-weight: 300;
+      letter-spacing: 0.6em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      margin-bottom: 2.5rem;
+      opacity: 0;
+      animation: fadeSlideIn 1.8s ease 0.3s forwards;
+    }
+
+    .splash h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4.5rem, 13vw, 11rem);
+      font-weight: 400;
+      font-style: italic;
+      letter-spacing: -0.03em;
+      line-height: 0.88;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fadeSlideIn 2s ease 0.6s forwards;
+    }
+
+    .splash .subtitle {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(0.95rem, 1.8vw, 1.3rem);
+      font-weight: 300;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      opacity: 0;
+      animation: fadeSlideIn 1.8s ease 1.2s forwards;
+    }
+
+    .splash .rule {
+      width: 1px;
+      height: 70px;
+      background: linear-gradient(to bottom, transparent, var(--cream-dim), transparent);
+      margin: 2.5rem auto;
+      opacity: 0;
+      animation: fadeSlideIn 1.8s ease 1s forwards;
+    }
+
+    .splash .scroll-hint {
+      margin-top: 2.5rem;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      opacity: 0;
+      animation: fadeSlideIn 1.5s ease 1.6s forwards;
+    }
+
+    .splash .scroll-hint::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 50px;
+      background: linear-gradient(to bottom, var(--cream-dim), transparent);
+      margin: 1.2rem auto 0;
+      animation: pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.15; transform: scaleY(0.4); }
+      50% { opacity: 0.7; transform: scaleY(1); }
+    }
+
+    /* ── Sections ── */
+    .sections {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    .section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 0;
+      scroll-snap-align: start;
+    }
+
+    .section .number,
+    .section h2,
+    .section .divider,
+    .section p,
+    .section .quote {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .section h2        { transition-delay: 0.12s; }
+    .section .divider   { transition-delay: 0.22s; }
+    .section p          { transition-delay: 0.32s; }
+    .section .quote     { transition-delay: 0.44s; }
+
+    .section.revealed .number,
+    .section.revealed h2,
+    .section.revealed .divider,
+    .section.revealed p,
+    .section.revealed .quote {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section.revealed h2 { opacity: 0.85; }
+    .section:first-child.revealed h2 { opacity: 1; }
+
+    .section .number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.5em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      margin-bottom: 3.5rem;
+      position: relative;
+    }
+
+    .section .number::before,
+    .section .number::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 1px;
+      background: var(--cream-dim);
+      vertical-align: middle;
+      margin: 0 1em;
+      opacity: 0.5;
+    }
+
+    .section h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 2.2rem;
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+    }
+
+    .section:not(:first-child) h2 {
+      opacity: 0.85;
+    }
+
+    .section p {
+      font-size: clamp(1rem, 1.8vw, 1.15rem);
+      line-height: 2.1;
+      color: var(--cream-dim);
+      max-width: 480px;
+      letter-spacing: 0.01em;
+    }
+
+    .section .divider {
+      width: 36px;
+      height: 1px;
+      background: linear-gradient(to right, transparent, var(--cream-dim), transparent);
+      margin: 2.8rem auto;
+    }
+
+    .section .quote {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: clamp(1.1rem, 2vw, 1.35rem);
+      line-height: 1.9;
+      color: var(--cream-bright);
+      max-width: 440px;
+      opacity: 0.7;
+      position: relative;
+      padding: 0 1.5rem;
+    }
+
+    .section .quote::before {
+      content: '"';
+      position: absolute;
+      left: -0.5rem;
+      top: -0.8rem;
+      font-size: 3.5rem;
+      color: var(--cream-dim);
+      opacity: 0.3;
+      font-family: 'Playfair Display', serif;
+      line-height: 1;
+    }
+
+    /* ── Finale ── */
+    .finale {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      scroll-snap-align: start;
+    }
+
+    .finale .overline,
+    .finale h2,
+    .finale p,
+    .finale .cta {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                  transform 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .finale h2   { transition-delay: 0.12s; }
+    .finale p    { transition-delay: 0.28s; }
+    .finale .cta { transition-delay: 0.4s; }
+
+    .finale.revealed .overline,
+    .finale.revealed h2,
+    .finale.revealed p,
+    .finale.revealed .cta {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .finale .overline {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.6em;
+      text-transform: uppercase;
+      color: var(--cream-dim);
+      margin-bottom: 2.5rem;
+    }
+
+    .finale h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.2rem, 9vw, 7.5rem);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 0.93;
+      letter-spacing: -0.025em;
+      margin-bottom: 3.5rem;
+    }
+
+    .finale p {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      line-height: 2.1;
+      color: var(--cream-dim);
+      max-width: 420px;
+      letter-spacing: 0.01em;
+    }
+
+    .finale .cta {
+      display: inline-block;
+      margin-top: 4rem;
+      padding: 1.1em 4em;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.72rem;
+      font-weight: 400;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      color: var(--dark);
+      background: var(--cream);
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      position: relative;
+    }
+
+    .finale .cta:hover {
+      background: var(--cream-bright);
+      color: var(--dark);
+      transform: translateY(-2px);
+      letter-spacing: 0.5em;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .section {
+        padding: 4rem 0;
+      }
+    }
+
+    /* ── Custom GUI Panel ── */
+    .gui-panel {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 9999;
+      width: 280px;
+      font-family: 'Inter', sans-serif;
+      font-size: 11px;
+      color: #e0dcd8;
+      user-select: none;
+      max-height: calc(100vh - 24px);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .gui-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      background: rgba(18, 14, 12, 0.94);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px 8px 0 0;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      font-weight: 500;
+      font-size: 10px;
+      text-transform: uppercase;
+      transition: background 0.2s ease;
+    }
+
+    .gui-panel.collapsed .gui-panel-header {
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: auto;
+    }
+
+    .gui-panel-header .gui-header-label {
+      transition: opacity 0.15s ease;
+    }
+
+    .gui-panel.collapsed .gui-header-label {
+      display: none;
+    }
+
+    .gui-panel-header .gui-chevron {
+      font-size: 14px;
+      opacity: 0.5;
+    }
+
+    .gui-panel.collapsed .gui-chevron {
+      display: none;
+    }
+
+    .gui-panel-header .gui-icon {
+      display: none;
+      width: 16px;
+      height: 16px;
+      opacity: 0.7;
+    }
+
+    .gui-panel.collapsed .gui-icon {
+      display: block;
+    }
+
+    .gui-panel-body {
+      background: rgba(18, 14, 12, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      max-height: calc(100vh - 70px);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,0.08) transparent;
+    }
+
+    .gui-panel.collapsed .gui-panel-body {
+      display: none;
+    }
+
+    .gui-panel-body::-webkit-scrollbar {
+      width: 4px;
+    }
+    .gui-panel-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .gui-panel-body::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.12);
+      border-radius: 2px;
+    }
+
+    .gui-folder {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    .gui-folder-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 14px;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #b8a99a;
+      transition: color 0.15s;
+    }
+
+    .gui-folder-header:hover {
+      color: #e0dcd8;
+    }
+
+    .gui-folder-header .folder-chevron {
+      font-size: 9px;
+      opacity: 0.4;
+      transition: transform 0.2s ease;
+    }
+
+    .gui-folder.closed .folder-chevron {
+      transform: rotate(-90deg);
+    }
+
+    .gui-folder.closed .gui-folder-body {
+      display: none;
+    }
+
+    .gui-folder-body {
+      padding: 2px 0 6px;
+    }
+
+    .gui-row {
+      display: flex;
+      align-items: center;
+      padding: 3px 14px 3px 22px;
+      gap: 8px;
+      min-height: 26px;
+    }
+
+    .gui-row label {
+      flex: 0 0 auto;
+      width: 110px;
+      font-size: 10.5px;
+      color: #9a918a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .gui-row .gui-control {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .gui-row input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 3px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .gui-row input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c4a882;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .gui-row input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+    }
+
+    .gui-row input[type="range"]::-moz-range-thumb {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #c4a882;
+      border: none;
+      cursor: pointer;
+    }
+
+    .gui-row .gui-value {
+      flex: 0 0 36px;
+      text-align: right;
+      font-size: 10px;
+      color: #7a726b;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gui-row input[type="color"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 28px;
+      height: 18px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+      background: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .gui-row input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 1px;
+    }
+
+    .gui-row input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 2px;
+    }
+
+    .gui-row input[type="checkbox"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 3px;
+      background: rgba(255,255,255,0.04);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .gui-row input[type="checkbox"]:checked {
+      background: #c4a882;
+      border-color: #c4a882;
+    }
+
+    .gui-row input[type="checkbox"]:checked::after {
+      content: '✓';
+      position: absolute;
+      top: -1px;
+      left: 2px;
+      font-size: 10px;
+      color: #1a1412;
+      font-weight: 600;
+    }
+
+    .gui-row select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 3px;
+      color: #e0dcd8;
+      font-family: 'Inter', sans-serif;
+      font-size: 10px;
+      padding: 3px 6px;
+      cursor: pointer;
+      outline: none;
+      width: 100%;
+    }
+
+    .gui-row select option {
+      background: #1a1412;
+      color: #e0dcd8;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Splash -->
+  <section class="splash">
+    <p class="overline">ITP / New York University</p>
+    <h1>Queena<br>Zheng</h1>
+    <div class="rule"></div>
+    <p class="subtitle">Where stillness meets movement</p>
+    <div class="scroll-hint">Scroll</div>
+  </section>
+
+  <!-- Content sections -->
+  <div class="sections">
+
+    <div class="section">
+      <p class="number">Chapter I</p>
+      <h2>The architecture<br>of silence</h2>
+      <div class="divider"></div>
+      <p>The world isn't smooth—it's a collection of angles, facets, and light. We embrace the sharp edges of creativity to craft experiences that feel tangible in a virtual world. Here, simplicity is the ultimate sophistication, and every polygon tells a story of intent.</p>
+    </div>
+
+    <div class="section">
+      <p class="number">Chapter II</p>
+      <h2>Draped in<br>liquid light</h2>
+      <div class="divider"></div>
+      <p>There is a profound power in the unadorned. We believe in the strength of the original form—the raw, geometric soul of things. By focusing on the essential, we create a space where light and shadow perform a dance of pure clarity.</p>
+      <div class="divider"></div>
+      <p class="quote">Elegance is not about being noticed. It is about being remembered.</p>
+    </div>
+
+    <div class="section">
+      <p class="number">Chapter III</p>
+      <h2>Colour of<br>warm stone</h2>
+      <div class="divider"></div>
+      <p>As you scroll, the horizon shifts. What was once a flat plane rises into a jagged peak; what was once a shadow becomes a highlight. In this 3D realm, you are not just an observer—you are the catalyst for transformation. Feel the rhythm of the geometry as it breathes and bends to your curiosity.</p>
+    </div>
+
+  </div>
+
+  <!-- Finale -->
+  <div class="finale">
+    <p class="overline">The Collection</p>
+    <h2>Defining<br>edges in a<br>fluid world</h2>
+    <p>Observe the seamless flow of evolution. As you descend, the environment adapts, echoing the fluid nature of modern ideas. This is a landscape where the digital feels organic, and the abstract feels real. We define the boundaries so you can break them.</p>
+    <a class="cta" href="javascript:void(0)" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">Connect with the Core</a>
+  </div>
+
+  <!-- Custom GUI Panel -->
+  <div class="gui-panel collapsed" id="guiPanel">
+    <div class="gui-panel-header" id="guiPanelHeader">
+      <span class="gui-header-label">Properties</span>
+      <span class="gui-chevron">▼</span>
+      <svg class="gui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </div>
+    <div class="gui-panel-body" id="guiPanelBody"></div>
+  </div>
+
+  <script>
+    // Scroll-triggered fade-in for sections and finale
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+        }
+      });
+    }, { threshold: 0.18 });
+
+    document.querySelectorAll('.section, .finale').forEach((el) => {
+      revealObserver.observe(el);
+    });
+  </script>
+  <script type="module" src="/scene.js"></script>
+</body>
+</html>
