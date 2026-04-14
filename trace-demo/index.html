@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trace</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <div class="app-shell">
+    <header class="topbar glass glossy">
+      <div class="brand-wrap">
+        <h1>Trace</h1>
+        <p>A quiet mirror for invisible digital habits.</p>
+      </div>
+
+      <div class="topbar-actions">
+        <button id="resetBtn" class="ghost-btn">Reset</button>
+        <button id="reflectBtn" class="primary-btn">Reflect Session</button>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <section class="capture-panel glass glossy">
+        <div class="panel-header">
+          <div>
+            <h2>Live Capture</h2>
+            <p>Browse inside the surface. Trace observes movement, pause, and repetition.</p>
+          </div>
+        </div>
+
+        <div class="browser-toolbar glass-lite">
+          <input
+            id="urlInput"
+            type="text"
+            placeholder="Paste a website link, e.g. https://example.com"
+          />
+          <button id="loadUrlBtn" class="ghost-btn small-btn">Load</button>
+          <button id="demoModeBtn" class="ghost-btn small-btn">Demo Content</button>
+        </div>
+
+        <div id="captureArea" class="capture-area">
+          <canvas id="traceCanvas"></canvas>
+
+          <div id="browserSurface" class="browser-surface">
+            <iframe
+              id="siteFrame"
+              class="site-frame hidden"
+              title="Trace Browser"
+            ></iframe>
+
+            <div id="fallbackOverlay" class="fallback-overlay hidden">
+              <div class="fallback-card glass glossy">
+                <h3>Embedding blocked</h3>
+                <p>
+                  This website does not allow being displayed inside an embedded frame.
+                  You can try another link or switch to Demo Content mode.
+                </p>
+                <button id="fallbackDemoBtn" class="primary-btn">Open Demo Content</button>
+              </div>
+            </div>
+
+            <div id="demoContent" class="demo-content">
+              <div class="demo-nav">
+                <div class="demo-brand">Archive / Reference / Signals</div>
+                <div class="demo-nav-links">
+                  <span>Essays</span>
+                  <span>Visual Systems</span>
+                  <span>Collections</span>
+                  <span>Notes</span>
+                </div>
+              </div>
+
+              <section class="editorial-hero">
+                <div class="hero-left">
+                  <div class="hero-kicker">Curated Design Reference</div>
+                  <h3>How interfaces shape attention, mood, and memory</h3>
+                  <p>
+                    A living archive of interface references, visual essays, motion studies, and
+                    interaction notes. This demo surface is designed to feel like a real inspiration
+                    website so Trace can capture more meaningful browsing behavior.
+                  </p>
+                </div>
+
+                <div class="hero-right">
+                  <div class="hero-stat-card">
+                    <span>Weekly Signal</span>
+                    <strong>12 new references</strong>
+                  </div>
+                  <div class="hero-stat-card accent-yellow">
+                    <span>Featured Theme</span>
+                    <strong>Soft Interaction</strong>
+                  </div>
+                </div>
+              </section>
+
+              <section class="featured-story">
+                <div class="featured-image"></div>
+                <div class="featured-copy">
+                  <div class="mini-label">Feature Essay</div>
+                  <h4>The quiet power of visual restraint in product design</h4>
+                  <p>
+                    Why some interfaces feel calmer, smarter, and more trustworthy—not because they
+                    do less, but because they reveal less at the right time.
+                  </p>
+                  <a href="#">Open feature</a>
+                </div>
+              </section>
+
+              <section class="section-heading">
+                <h4>Selected references</h4>
+                <p>A mix of editorial systems, interaction details, and visual research.</p>
+              </section>
+
+              <div class="reference-grid">
+                <article class="reference-card large-card">
+                  <div class="reference-thumb thumb-blue"></div>
+                  <div class="reference-meta">Interaction Study</div>
+                  <h5>Cursor movement as a signal of hesitation</h5>
+                  <p>
+                    A visual note on how repeated micro-movements reveal uncertainty better than
+                    obvious clicks.
+                  </p>
+                  <a href="#">Read note</a>
+                </article>
+
+                <article class="reference-card">
+                  <div class="reference-thumb thumb-yellow"></div>
+                  <div class="reference-meta">Editorial System</div>
+                  <h5>Designing for slower reading</h5>
+                  <p>
+                    Layout pacing, hierarchy, and spacing as tools for softer attention.
+                  </p>
+                  <a href="#">View article</a>
+                </article>
+
+                <article class="reference-card">
+                  <div class="reference-thumb thumb-grid"></div>
+                  <div class="reference-meta">Visual Archive</div>
+                  <h5>Glass layers and ambient depth</h5>
+                  <p>
+                    A growing collection of interface treatments that balance clarity and atmosphere.
+                  </p>
+                  <a href="#">Browse collection</a>
+                </article>
+
+                <article class="reference-card">
+                  <div class="reference-thumb thumb-lines"></div>
+                  <div class="reference-meta">Motion Detail</div>
+                  <h5>Hover states that feel physical</h5>
+                  <p>
+                    Small elevation cues, softened shadows, and responsive transitions that imply touch.
+                  </p>
+                  <a href="#">Open study</a>
+                </article>
+              </div>
+
+              <section class="masonry-section">
+                <div class="masonry-column">
+                  <div class="masonry-card note-card">
+                    <span class="mini-label">Short Note</span>
+                    <h5>Attention is often visible before it is measurable.</h5>
+                    <p>
+                      Many analytics systems focus on what users completed. Fewer reveal how they
+                      wandered, paused, or returned before making a choice.
+                    </p>
+                  </div>
+
+                  <div class="masonry-card image-card blue-block">
+                    <div class="floating-tag">Collection 03</div>
+                  </div>
+                </div>
+
+                <div class="masonry-column">
+                  <div class="masonry-card image-card yellow-block">
+                    <div class="floating-tag dark">Motion Study</div>
+                  </div>
+
+                  <div class="masonry-card note-card">
+                    <span class="mini-label">Reference Fragment</span>
+                    <h5>Systems that reflect, not just optimize.</h5>
+                    <p>
+                      Some tools should not push users toward productivity. They should help users
+                      notice what is already happening.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="masonry-column">
+                  <div class="masonry-card note-card">
+                    <span class="mini-label">Collected Insight</span>
+                    <h5>Micro-behaviors carry emotional texture.</h5>
+                    <p>
+                      Pause, repetition, and fragmented movement can suggest doubt, curiosity, or
+                      cognitive switching.
+                    </p>
+                  </div>
+
+                  <div class="masonry-card image-card grid-block">
+                    <div class="floating-tag">Archive View</div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="bookmark-strip">
+                <div class="bookmark-item">
+                  <span class="bookmark-label">Saved Link</span>
+                  <strong>Interface Notes / 24</strong>
+                </div>
+                <div class="bookmark-item">
+                  <span class="bookmark-label">Collected</span>
+                  <strong>Hover Studies</strong>
+                </div>
+                <div class="bookmark-item accent">
+                  <span class="bookmark-label">Featured Signal</span>
+                  <strong>Quiet Motion</strong>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <div class="capture-overlay">
+            <span id="surfaceLabel">Demo Content Surface</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="insight-column">
+        <section class="insight-card glass glossy">
+          <span class="card-label">Live Reading</span>
+          <h3 id="currentState">Waiting</h3>
+          <p id="stateDescription">Trace is listening for the first signs of motion, pause, and intent.</p>
+        </section>
+
+        <section class="insight-card glass glossy">
+          <span class="card-label">Behavior Signal</span>
+          <h3 id="patternLabel">No pattern yet</h3>
+          <p id="patternDescription">Subtle repetition, directional drift, and hover density will appear here.</p>
+        </section>
+
+        <section class="insight-card glass glossy">
+          <span class="card-label">Interaction Tempo</span>
+          <h3 id="rhythmLabel">Idle</h3>
+          <p id="rhythmDescription">Trace will describe the pace of this session once movement begins.</p>
+        </section>
+
+        <section class="insight-card glass glossy metrics-card">
+          <span class="card-label">Session Data</span>
+          <div class="metric-row">
+            <span>Movements</span>
+            <strong id="movementCount">0</strong>
+          </div>
+          <div class="metric-row">
+            <span>Clicks</span>
+            <strong id="clickCount">0</strong>
+          </div>
+          <div class="metric-row">
+            <span>Hover Zones</span>
+            <strong id="hoverZoneCount">0</strong>
+          </div>
+          <div class="metric-row">
+            <span>Avg Speed</span>
+            <strong id="avgSpeed">0</strong>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <section class="summary-panel glass glossy">
+      <div class="summary-header">
+        <div>
+          <h2>Session Reflection</h2>
+          <p>Your invisible behavior becomes readable here.</p>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-stats">
+          <div class="summary-stat">
+            <span>Main State</span>
+            <strong id="summaryState">—</strong>
+          </div>
+          <div class="summary-stat">
+            <span>Total Clicks</span>
+            <strong id="summaryClicks">0</strong>
+          </div>
+          <div class="summary-stat">
+            <span>Hover Zones</span>
+            <strong id="summaryZones">0</strong>
+          </div>
+          <div class="summary-stat">
+            <span>Avg Speed</span>
+            <strong id="summarySpeed">0</strong>
+          </div>
+        </div>
+
+        <div class="summary-text-wrap">
+          <p id="summaryText">
+            No reflection yet. Interact with the live surface, then click “Reflect Session” to generate a session summary.
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

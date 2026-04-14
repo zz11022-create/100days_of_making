@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
+    <script src="https://unpkg.com/ml5@0.20.0-alpha.4/dist/ml5.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;300;700&display=swap');
+        body { margin: 0; background: #060A14; font-family: 'JetBrains Mono', monospace; color: #fff; overflow: hidden; }
+        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .screen { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; pointer-events: auto; background: rgba(6,10,20,0.8); backdrop-filter: blur(10px); }
+        #screen-login { background: rgba(6,10,20,0.55); backdrop-filter: blur(6px); }
+        .glass-panel { border-left: 1px solid rgba(255,255,255,0.2); padding: 40px; text-align: left; }
+        h1 { font-weight: 100; font-size: 4rem; letter-spacing: -2px; margin: 0; }
+        input { background: none; border: none; border-bottom: 1px solid #fff; color: #fff; font-family: inherit; font-size: 1.5rem; outline: none; padding: 10px 0; margin: 20px 0; width: 300px; }
+        button { background: #fff; color: #000; border: none; padding: 15px 40px; cursor: pointer; font-family: inherit; font-weight: 700; transition: 0.3s; }
+        button:hover { background: #00f2ff; letter-spacing: 2px; }
+        #hud { position: absolute; top: 30px; left: 30px; border-left: 2px solid #00f2ff; padding-left: 15px; font-size: 0.8rem; line-height: 1.6; opacity: 0.7; }
+        .btn-stop { position: absolute; bottom: 30px; right: 30px; background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); pointer-events: auto; }
+        #report-actions {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0;
+            width: 100%;
+            padding: 28px 0;
+            box-sizing: border-box;
+            background: linear-gradient(transparent, rgba(6,10,20,0.97));
+            justify-content: center;
+            gap: 20px;
+            z-index: 9999;
+            pointer-events: auto;
+        }
+        #report-actions button.secondary {
+            background: none;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+        #report-actions button.secondary:hover { background: rgba(255,255,255,0.1); }
+    </style>
+</head>
+<body>
+    <div id="overlay">
+        <div id="screen-login" class="screen">
+            <div class="glass-panel">
+                <p style="opacity: 0.5; font-size: 0.7rem;">VERSION 2.0 // NEURAL FLOW</p>
+                <h1>FLUIDCARE</h1>
+                <input type="text" id="username" placeholder="SUBJECT_NAME">
+                <button onclick="startTraining()">INITIATE SESSION</button>
+            </div>
+        </div>
+
+        <div id="screen-hud" style="display:none;">
+            <div id="hud">
+                STATUS: RUNNING<br>
+                VELOCITY: <span id="val-speed">0.0</span><br>
+                OPENNESS: <span id="val-open">0.0</span>
+            </div>
+            <button class="btn-stop" onclick="showReport()">TERMINATE & ANALYZE</button>
+        </div>
+    </div>
+
+    <div id="report-actions">
+        <button onclick="exportReport()">EXPORT FULL REPORT</button>
+        <button class="secondary" onclick="location.reload()">NEW SESSION</button>
+    </div>
+
+    <script src="sketch.js"></script>
+</body>
+</html>

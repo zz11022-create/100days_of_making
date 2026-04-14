@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Match Your Pet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-page="match">
+  <main class="page-wrap">
+    <section class="section-header">
+      <h1 class="page-title">Find Your Match</h1>
+      <p class="page-subtitle">Real cats waiting for adoption — tell us about your lifestyle</p>
+    </section>
+
+    <!-- Location Filter -->
+    <section class="slider-panel">
+      <div class="slider-card location-card">
+        <div class="slider-top">
+          <span>📍 Your Location</span>
+          <span class="source-badge" id="sourceBadge">Mock Data</span>
+        </div>
+        <input
+          type="text"
+          id="locationInput"
+          class="location-input"
+          placeholder="City or Zip Code (e.g. New York, NY)"
+        />
+        <div class="slider-top" style="margin-top:18px">
+          <span>📏 Search Radius</span>
+          <span id="distanceValue">25 miles</span>
+        </div>
+        <div class="slider-labels">
+          <span>5 mi</span>
+          <span>100 mi</span>
+        </div>
+        <input type="range" min="5" max="100" value="25" id="distance" />
+      </div>
+    </section>
+
+    <!-- Lifestyle Sliders -->
+    <section class="slider-panel" style="margin-top:18px">
+      <div class="slider-card">
+        <div class="slider-top">
+          <span>⚡ Energy Tolerance</span>
+          <span id="energyValue">3/5</span>
+        </div>
+        <div class="slider-labels">
+          <span>Calm cat</span>
+          <span>Hyperactive</span>
+        </div>
+        <input type="range" min="1" max="5" value="3" id="energy" />
+      </div>
+
+      <div class="slider-card">
+        <div class="slider-top">
+          <span>🔊 Noise Tolerance</span>
+          <span id="noiseValue">3/5</span>
+        </div>
+        <div class="slider-labels">
+          <span>Quiet cat</span>
+          <span>Vocal</span>
+        </div>
+        <input type="range" min="1" max="5" value="3" id="noise" />
+      </div>
+
+      <div class="slider-card">
+        <div class="slider-top">
+          <span>👥 Social Preference</span>
+          <span id="socialValue">3/5</span>
+        </div>
+        <div class="slider-labels">
+          <span>Shy cat</span>
+          <span>Very social</span>
+        </div>
+        <input type="range" min="1" max="5" value="3" id="social" />
+      </div>
+
+      <div class="slider-card">
+        <div class="slider-top">
+          <span>🤗 Cuddle Factor</span>
+          <span id="cuddleValue">3/5</span>
+        </div>
+        <div class="slider-labels">
+          <span>Independent</span>
+          <span>Snuggly</span>
+        </div>
+        <input type="range" min="1" max="5" value="3" id="cuddle" />
+      </div>
+
+      <div class="toggle-card">
+        <div class="toggle-row">
+          <span>🏠 Apartment friendly</span>
+          <input type="checkbox" id="apartment" />
+        </div>
+        <div class="toggle-row">
+          <span>🐣 First time pet owner</span>
+          <input type="checkbox" id="firstTime" />
+        </div>
+        <div class="toggle-row">
+          <span>💻 Works from home</span>
+          <input type="checkbox" id="home" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Match Preview -->
+    <section class="match-preview">
+      <!-- JS will call renderPetDetail() to populate this container -->
+      <div id="matched-pet-display">
+        <div class="loading">Finding cats near you...</div>
+      </div>
+
+      <button type="button" class="main-button" id="meetBtn" style="margin-top:28px">Meet Your Match 🎉</button>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

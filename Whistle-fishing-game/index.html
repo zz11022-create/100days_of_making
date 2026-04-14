@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fish of Fortune — Whistle Fishing</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/p5.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.4/addons/p5.sound.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(202, 241, 255, 0.45), transparent 18%),
+        radial-gradient(circle at 84% 10%, rgba(255,255,255,0.26), transparent 18%),
+        linear-gradient(180deg, #a8e5ff 0%, #7ec9ee 24%, #5f9ce3 54%, #436bc9 76%, #3450af 100%);
+      font-family: Inter, ui-rounded, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    canvas { display: block; }
+
+    .hint {
+      position: fixed;
+      left: 50%;
+      bottom: 16px;
+      transform: translateX(-50%);
+      padding: 10px 16px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.95);
+      background: rgba(255,255,255,0.16);
+      border: 1px solid rgba(255,255,255,0.18);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 30px rgba(15, 51, 117, 0.18);
+      pointer-events: none;
+      letter-spacing: 0.02em;
+    }
+  </style>
+</head>
+<body>
+  <div class="hint">Click to enable mic · Move mouse left/right · Hum low to dive, high to rise · Press R to restart</div>
+
+  <script>
+    let mic, fft;
+    let started = false;
+    let scene = "start";
+
+    let hookX, hookY, hookYSmoothed, targetY;
+    let hookTargetX;
+    let fishes = [];
+    let particles = [];
+    let seaPlants = [];
+    let bubbles = [];
+    let backFish = [];
+    let caughtFish = null;
+
+    let score = 0;
+    let combo = 0;
+    let bestCombo = 0;
+    let timeLimit = 60;
+    let gameStartFrame = 0;
+    let remainingTime = 60;
+
+    let lastCatchTime = 0;
+    let catchCooldownMs = 360;
+
+    let pitchHz = 0;
+    let pitchConfidence = 0;
+    let rareFlash = 0;
+    let titleFloat = 0;
+
+    function setup() {
+      createCanvas(windowWidth, windowHeight);
+      textFont("Trebuchet MS");
+      initWorld();
+      resetGame();
+    }
+
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
+      initWorld();
+      resetHook();
+    }
+
+    function initWorld() {
+      seaPlants = [];
+      bubbles = [];
+      fishes = [];
+      backFish = [];
+      particles = [];
+
+      for (let i = 0; i < 15; i++) {
+        seaPlants.push({
+          x: map(i, 0, 14, width * 0.03, width * 0.97) + random(-28, 28),
+          h: random(height * 0.16, height * 0.42),
+          w: random(30, 68),
+          sway: random(0.7, 1.7),
+          phase: random(TWO_PI),
+          tone: random(0, 1),
+          depth: random([0, 1, 2])
+        });
+      }
+
+      for (let i = 0; i < 28; i++) {
+        bubbles.push(new Bubble(random(width), random(height * 0.2, height * 0.97), random(4, 16), random(0.25, 1)));
+      }
+
+      for (let i = 0; i < 12; i++) fishes.push(new Fish());
+      for (let i = 0; i < 9; i++) backFish.push(new BackgroundFish());
+    }
+
+    function resetHook() {
+      hookX = width * 0.48;
+      hookTargetX = hookX;
+      hookY = height * 0.48;
+      hookYSmoothed = hookY;
+      targetY = hookY;
+    }
+
+    function resetGame() {
+      score = 0;
+      combo = 0;
+      bestCombo = 0;
+      remainingTime = timeLimit;
+      caughtFish = null;
+      rareFlash = 0;
+      gameStartFrame = frameCount;
+      resetHook();
+      for (let f of fishes) f.respawn(true);
+      scene = started ? "playing" : "start";
+    }
+
+    function draw() {
+      drawBackgroundOcean();
+      updateAmbient();
+      drawBackgroundFish();
+      drawSeaPlants(0);
+      drawRockArches();
+      drawSeaPlants(1);
+
+      if (scene === "start") {
+        drawStartScreen();
+        drawSeaPlants(2);
+        return;
+      }
+
+      if (scene === "playing") {
+        runGame();
+      } else {
+        drawResultScreen();
+      }
+
+      drawSeaPlants(2);
+    }
+
+    function runGame() {
+      remainingTime = max(0, timeLimit - (frameCount - gameStartFrame) / 60);
+      if (remainingTime <= 0) scene = "result";
+
+      updateAudioPitch();
+      updateHook();
+      for (let f of fishes) f.update();
+      for (let p of particles) p.update();
+      particles = particles.filter(p => !p.dead);
+
+      tryCatchFish();
+      updateCaughtFish();
+
+      drawBasketZone();
+      for (let f of fishes) f.draw();
+      drawHook();
+      for (let p of particles) p.draw();
+      drawHUD();
+    }
+
+    function updateAmbient() {
+      titleFloat += 0.018;
+      rareFlash *= 0.92;
+      for (let b of bubbles) b.update();
+      for (let b of bubbles) b.draw();
+    }
+
+    function drawBackgroundOcean() {
+      for (let i = 0; i < height; i += 2) {
+        let t = i / height;
+        let c = lerpColor(color(193, 234, 244), color(70, 109, 196), pow(t, 1.12));
+        stroke(c);
+        line(0, i, width, i);
+      }
+      noStroke();
+
+      fill(255,255,255,36);
+      ellipse(width * 0.16, height * 0.08, width * 0.24, width * 0.16);
+      ellipse(width * 0.84, height * 0.07, width * 0.30, width * 0.17);
+
+      fill(255,255,255,48);
+      rect(0, height * 0.18, width, 5);
+
+      for (let i = 0; i < 7; i++) {
+        let x = width * (0.08 + i * 0.15) + sin(frameCount * 0.01 + i) * 18;
+        let y = height * 0.17 + sin(frameCount * 0.03 + i * 0.7) * 5;
+        fill(255,255,255,18);
+        ellipse(x, y, 160, 26);
+      }
+
+      fill(222, 241, 246, 75);
+      ellipse(width * 0.84, height * 0.40, width * 0.34, height * 0.54);
+      fill(128, 176, 224, 52);
+      ellipse(width * 0.89, height * 0.46, width * 0.26, height * 0.40);
+
+      fill(255, 228, 125, rareFlash * 28);
+      rect(0, 0, width, height);
+    }
+
+    function drawBackgroundFish() {
+      for (let f of backFish) {
+        f.update();
+        f.draw();
+      }
+    }
+
+    function drawRockArches() {
+      push();
+      noStroke();
+
+      fill(101, 153, 204, 68);
+      ellipse(width * 0.86, height * 0.49, width * 0.34, height * 0.58);
+
+      fill(84, 129, 192, 128);
+      arc(width * 0.86, height * 0.62, width * 0.46, height * 0.66, PI, TWO_PI, CHORD);
+      fill(187, 221, 235, 82);
+      arc(width * 0.86, height * 0.62, width * 0.24, height * 0.34, PI, TWO_PI, CHORD);
+
+      stroke(208, 235, 241, 46);
+      strokeWeight(10);
+      noFill();
+      arc(width * 0.86, height * 0.62, width * 0.42, height * 0.60, PI * 1.06, TWO_PI - 0.08);
+      noStroke();
+      pop();
+    }
+
+    function drawSeaPlants(layer) {
+      push();
+      for (let p of seaPlants) {
+        if (p.depth !== layer) continue;
+        let sway = sin(frameCount * 0.017 * p.sway + p.phase) * (layer === 2 ? 32 : 18);
+        let baseY = height + (layer === 2 ? 10 : 0);
+        let body = lerpColor(color(41, 89, 141), color(71, 118, 182), p.tone * 0.55);
+        let edge = color(117, 238, 151);
+        let alpha = layer === 0 ? 78 : layer === 1 ? 138 : 220;
+
+        fill(red(body), green(body), blue(body), alpha);
+        noStroke();
+        beginShape();
+        vertex(p.x - p.w * 0.2, baseY);
+        bezierVertex(
+          p.x - p.w * 0.56 + sway * 0.08, baseY - p.h * 0.28,
+          p.x - p.w * 0.14 + sway * 0.9, baseY - p.h * 0.7,
+          p.x + sway, baseY - p.h
+        );
+        bezierVertex(
+          p.x + p.w * 0.34 + sway * 0.62, baseY - p.h * 0.64,
+          p.x + p.w * 0.22 + sway * 0.05, baseY - p.h * 0.24,
+          p.x + p.w * 0.18, baseY
+        );
+        endShape(CLOSE);
+
+        stroke(red(edge), green(edge), blue(edge), layer === 2 ? 64 : 34);
+        strokeWeight(layer === 2 ? 2.6 : 1.5);
+        noFill();
+        beginShape();
+        vertex(p.x + p.w * 0.02, baseY - 10);
+        bezierVertex(
+          p.x + sway * 0.22, baseY - p.h * 0.26,
+          p.x + sway * 0.54, baseY - p.h * 0.54,
+          p.x + sway * 0.82, baseY - p.h * 0.86
+        );
+        endShape();
+        noStroke();
+      }
+      pop();
+    }
+
+    function updateAudioPitch() {
+      if (!fft) return;
+      let wave = fft.waveform(1024);
+      let result = detectPitchAutoCorr(wave, sampleRate());
+      pitchHz = result.pitch;
+      pitchConfidence = result.confidence;
+    }
+
+    function updateHook() {
+      hookTargetX = constrain(mouseX, width * 0.08, width * 0.92);
+      hookX = lerp(hookX, hookTargetX, 0.16);
+
+      let minHz = 70;
+      let maxHz = 800;
+      if (pitchConfidence > 0.16 && pitchHz >= minHz && pitchHz <= 2200) {
+        let usablePitch = constrain(pitchHz, minHz, maxHz);
+        let curved = constrain(map(usablePitch, minHz, maxHz, 0, 1, true), 0, 1);
+        curved = pow(curved, 0.58);
+        let topY = height * 0.04;
+        let bottomY = height * 0.89;
+        targetY = lerp(bottomY, topY, curved);
+      } else {
+        targetY = lerp(targetY, height * 0.5, 0.032);
+      }
+
+      hookYSmoothed = lerp(hookYSmoothed, targetY, 0.18);
+      hookY = hookYSmoothed;
+    }
+
+    function updateCaughtFish() {
+      if (!caughtFish) return;
+
+      caughtFish.x = hookX + 26;
+      caughtFish.y = hookY + 20;
+      caughtFish.sparkle();
+
+      let basket = getBasketRect();
+      let insideBasket = caughtFish.x > basket.x + 10 && caughtFish.x < basket.x + basket.w - 10 && caughtFish.y > basket.y + 10 && caughtFish.y < basket.y + basket.h - 6;
+
+      if (insideBasket) {
+        let gained = caughtFish.points;
+        combo += 1;
+        bestCombo = max(bestCombo, combo);
+        if (combo >= 3) gained += 1;
+        if (caughtFish.type === "gold") rareFlash = 1;
+        score += gained;
+        spawnBurst(caughtFish.x, caughtFish.y, caughtFish.type === 'common' ? 10 : 16, caughtFish.type);
+        caughtFish.respawn();
+        caughtFish = null;
+      }
+    }
+
+    function tryCatchFish() {
+      let now = millis();
+      if (caughtFish) return;
+      if (now - lastCatchTime < catchCooldownMs) return;
+      if (pitchConfidence < 0.34) return;
+
+      let hx = hookX + 18;
+      let hy = hookY + 16;
+      let found = false;
+      for (let f of fishes) {
+        let d = dist(hx, hy, f.x, f.y);
+        if (d < f.size * 0.82) {
+          caughtFish = f;
+          lastCatchTime = now;
+          found = true;
+          spawnBurst(f.x, f.y, 8, f.type);
+          break;
+        }
+      }
+
+      if (!found && frameCount % 90 === 0 && combo > 0) combo = max(0, combo - 1);
+    }
+
+    function getBasketRect() {
+      let w = min(210, width * 0.19);
+      let h = 92;
+      return {
+        x: width * 0.77,
+        y: 18,
+        w,
+        h
+      };
+    }
+
+    function drawBasketZone() {
+      let b = getBasketRect();
+      let active = caughtFish && caughtFish.x > b.x && caughtFish.x < b.x + b.w && caughtFish.y > b.y && caughtFish.y < b.y + b.h;
+
+      push();
+      drawingContext.shadowColor = active ? 'rgba(255, 223, 108, 0.5)' : 'rgba(26, 82, 178, 0.2)';
+      drawingContext.shadowBlur = active ? 34 : 24;
+      fill(230, 248, 255, 150);
+      stroke(active ? color(255, 236, 150, 210) : color(255,255,255,126));
+      strokeWeight(active ? 2.6 : 1.2);
+      rect(b.x, b.y, b.w, b.h, 28);
+
+      noStroke();
+      fill(active ? color(255, 226, 120, 90) : color(123, 213, 255, 72));
+      rect(b.x + 10, b.y + b.h - 22, b.w - 20, 12, 999);
+
+      fill(58, 111, 191);
+      textAlign(CENTER, CENTER);
+      textStyle(BOLD);
+      textSize(min(24, width * 0.018));
+      text("TREASURE BASKET", b.x + b.w / 2, b.y + 28);
+      textStyle(NORMAL);
+      textSize(min(14, width * 0.012));
+      fill(active ? color(178, 117, 16) : color(88, 132, 202));
+      text(active ? "Release zone reached" : "Bring the fish fully inside", b.x + b.w / 2, b.y + 58);
+
+      stroke(active ? color(255, 220, 95, 210) : color(255,255,255,122));
+      strokeWeight(active ? 4 : 2);
+      line(b.x + 12, b.y + b.h - 8, b.x + b.w - 12, b.y + b.h - 8);
+
+      if (active) {
+        noFill();
+        stroke(255, 237, 163, 170);
+        rect(b.x + 8, b.y + 8, b.w - 16, b.h - 16, 22);
+      }
+      pop();
+    }
+
+    function drawHook() {
+      push();
+      stroke(255,255,255,185);
+      strokeWeight(2.4);
+      line(hookX, 0, hookX, hookY - 18);
+
+      noFill();
+      stroke(55, 84, 150);
+      strokeWeight(6);
+      beginShape();
+      vertex(hookX, hookY - 16);
+      vertex(hookX, hookY + 12);
+      quadraticVertex(hookX + 2, hookY + 24, hookX + 18, hookY + 19);
+      endShape();
+
+      noStroke();
+      fill(255, 235, 150, 120 + pitchConfidence * 130);
+      circle(hookX + 18, hookY + 19, 22 + pitchConfidence * 18);
+      fill(255, 253, 225, 220);
+      circle(hookX + 18, hookY + 19, 12);
+      pop();
+    }
+
+    function drawHUD() {
+      let x = 18;
+      let y = 18;
+      let w = min(390, width * 0.35);
+      let h = 120;
+      push();
+      drawingContext.shadowColor = 'rgba(19, 61, 142, 0.24)';
+      drawingContext.shadowBlur = 26;
+      fill(246, 252, 255, 146);
+      stroke(255,255,255,118);
+      strokeWeight(1.2);
+      rect(x, y, w, h, 28);
+
+      noStroke();
+      fill(83, 140, 214);
+      textAlign(LEFT, TOP);
+      textStyle(BOLD);
+      textSize(min(28, width * 0.024));
+      text("Fish of Fortune", x + 18, y + 14);
+
+      fill(89, 127, 191);
+      textStyle(NORMAL);
+      textSize(min(14, width * 0.012));
+      text(`Score  ${score}`, x + 18, y + 54);
+      text(`Combo  x${combo}`, x + 120, y + 54);
+      text(`Time  ${ceil(remainingTime)}s`, x + 224, y + 54);
+
+      let hz = pitchHz > 0 ? nf(pitchHz, 0, 1) : "--";
+      let conf = nf(pitchConfidence * 100, 2, 0) + "%";
+      fill(101, 131, 191);
+      text(`Pitch  ${hz} Hz`, x + 18, y + 80);
+      text(`Signal  ${conf}`, x + 18, y + 100);
+      text(`Mouse steers the line horizontally`, x + 160, y + 100);
+
+      fill(227, 239, 255);
+      rect(x + w - 150, y + 80, 120, 12, 999);
+      fill(95, 196, 255);
+      rect(x + w - 150, y + 80, 120 * constrain(pitchConfidence, 0, 1), 12, 999);
+      pop();
+    }
+
+    function drawStartScreen() {
+      push();
+      fill(18, 55, 118, 88);
+      rect(0, 0, width, height);
+
+      let cardW = min(760, width * 0.84);
+      let cardH = min(560, height * 0.74);
+      let x = width / 2 - cardW / 2;
+      let y = height / 2 - cardH / 2;
+
+      drawingContext.shadowColor = 'rgba(17, 65, 143, 0.24)';
+      drawingContext.shadowBlur = 36;
+      fill(246, 252, 255, 154);
+      stroke(255,255,255,128);
+      strokeWeight(1.3);
+      rect(x, y, cardW, cardH, 36);
+
+      fill(255,255,255,56);
+      ellipse(x + cardW * 0.24, y + 80, 180, 54);
+      ellipse(x + cardW * 0.76, y + 98, 220, 60);
+
+      fill(92, 150, 219);
+      noStroke();
+      textAlign(CENTER, CENTER);
+      textStyle(BOLD);
+      textSize(min(68, width * 0.055));
+      text("FISH OF FORTUNE", width / 2, y + 92 + sin(titleFloat) * 6);
+
+      fill(120, 167, 224);
+      textStyle(NORMAL);
+      textSize(min(19, width * 0.016));
+      text("A soft underwater whistle game", width / 2, y + 142);
+
+      drawShowcaseFish(width / 2 - 210, y + 285, 1.08, 'common');
+      drawShowcaseFish(width / 2, y + 250, 1.5, 'gold');
+      drawShowcaseFish(width / 2 + 210, y + 305, 1.12, 'rare');
+
+      fill(82, 122, 191);
+      textSize(min(20, width * 0.017));
+      text("Move your mouse to guide the line left and right.", width / 2, y + cardH - 160);
+      text("Hum low to dive deep, then hum high to lift the fish into the basket.", width / 2, y + cardH - 128);
+      text("The fish must be fully inside the basket area to score.", width / 2, y + cardH - 96);
+
+      let bw = min(250, cardW * 0.44);
+      let bh = 60;
+      let bx = width / 2 - bw / 2;
+      let by = y + cardH - 72;
+      drawingContext.shadowColor = 'rgba(255, 197, 80, 0.26)';
+      drawingContext.shadowBlur = 22;
+      fill(255, 214, 103, 235);
+      rect(bx, by, bw, bh, 999);
+      fill(84, 110, 170);
+      textStyle(BOLD);
+      textSize(22);
+      text("CLICK TO START", width / 2, by + bh / 2 + 1);
+      pop();
+    }
+
+    function drawResultScreen() {
+      push();
+      fill(18, 55, 118, 92);
+      rect(0, 0, width, height);
+
+      let cardW = min(650, width * 0.78);
+      let cardH = min(450, height * 0.62);
+      let x = width / 2 - cardW / 2;
+      let y = height / 2 - cardH / 2;
+
+      drawingContext.shadowColor = 'rgba(17, 65, 143, 0.24)';
+      drawingContext.shadowBlur = 36;
+      fill(246, 252, 255, 158);
+      stroke(255,255,255,130);
+      strokeWeight(1.3);
+      rect(x, y, cardW, cardH, 34);
+
+      fill(88, 146, 218);
+      noStroke();
+      textAlign(CENTER, CENTER);
+      textStyle(BOLD);
+      textSize(min(54, width * 0.042));
+      text("Voyage Complete", width / 2, y + 76);
+
+      fill(117, 166, 224);
+      textStyle(NORMAL);
+      textSize(min(18, width * 0.015));
+      text(getRankText(), width / 2, y + 122);
+
+      fill(82, 122, 191);
+      textSize(min(24, width * 0.02));
+      text(`Final Score  ${score}`, width / 2, y + 194);
+      text(`Best Combo  x${bestCombo}`, width / 2, y + 232);
+
+      drawShowcaseFish(width / 2 - 170, y + 305, 0.95, 'common');
+      drawShowcaseFish(width / 2, y + 286, 1.2, 'gold');
+      drawShowcaseFish(width / 2 + 170, y + 305, 0.95, 'rare');
+
+      fill(255, 214, 103, 235);
+      rect(width / 2 - 120, y + cardH - 84, 240, 58, 999);
+      fill(84, 110, 170);
+      textStyle(BOLD);
+      textSize(22);
+      text("PLAY AGAIN", width / 2, y + cardH - 55);
+      pop();
+    }
+
+    function getRankText() {
+      if (score >= 24) return "Legendary Angler · The sea answered your song.";
+      if (score >= 16) return "Golden Caller · Your melody drew rare fish to the surface.";
+      if (score >= 10) return "Ocean Friend · A beautiful and steady catch.";
+      return "Curious Beginner · Try a steadier hum and a higher pitch.";
+    }
+
+    function drawShowcaseFish(x, y, s, type) {
+      push();
+      translate(x, y + sin(frameCount * 0.028 + x * 0.01) * 6);
+      scale(s);
+      drawFishShape(type, 0, 0, 40, 1);
+      pop();
+    }
+
+    function mousePressed() {
+      if (!started) {
+        startAudio();
+        return;
+      }
+      if (scene === 'start') {
+        resetGame();
+        scene = 'playing';
+      } else if (scene === 'result') {
+        resetGame();
+      }
+    }
+
+    function keyPressed() {
+      if (key === ' ' && !started) startAudio();
+      if (key === 'r' || key === 'R') resetGame();
+      if (started && scene === 'start' && keyCode === ENTER) scene = 'playing';
+      if (started && scene === 'result' && keyCode === ENTER) resetGame();
+    }
+
+    async function startAudio() {
+      try {
+        await userStartAudio();
+        mic = new p5.AudioIn();
+        mic.start();
+        fft = new p5.FFT(0.85, 1024);
+        fft.setInput(mic);
+        started = true;
+        resetGame();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function spawnBurst(x, y, count, type) {
+      for (let i = 0; i < count; i++) particles.push(new Particle(x, y, type));
+    }
+
+    class Bubble {
+      constructor(x, y, size, speed) {
+        this.x = x;
+        this.y = y;
+        this.size = size;
+        this.speed = speed;
+        this.phase = random(TWO_PI);
+      }
+      update() {
+        this.y -= this.speed;
+        this.x += sin(frameCount * 0.02 + this.phase) * 0.35;
+        if (this.y < height * 0.14) {
+          this.y = random(height * 0.74, height * 0.99);
+          this.x = random(width);
+        }
+      }
+      draw() {
+        noFill();
+        stroke(255,255,255,72);
+        strokeWeight(1.3);
+        circle(this.x, this.y, this.size);
+        noStroke();
+        fill(255,255,255,34);
+        circle(this.x - this.size * 0.18, this.y - this.size * 0.18, this.size * 0.22);
+      }
+    }
+
+    class Particle {
+      constructor(x, y, type) {
+        this.x = x;
+        this.y = y;
+        this.vx = random(-2.6, 2.6);
+        this.vy = random(-2.4, 2.4);
+        this.life = random(24, 46);
+        this.maxLife = this.life;
+        this.type = type;
+        this.size = random(4, 10);
+      }
+      update() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.vy += 0.02;
+        this.life--;
+        this.dead = this.life <= 0;
+      }
+      draw() {
+        let a = map(this.life, 0, this.maxLife, 0, 190);
+        if (this.type === 'gold') fill(255, 229, 104, a);
+        else if (this.type === 'rare') fill(176, 214, 255, a);
+        else fill(171, 243, 226, a);
+        noStroke();
+        circle(this.x, this.y, this.size);
+      }
+    }
+
+    class BackgroundFish {
+      constructor() { this.reset(); }
+      reset() {
+        this.x = random(width);
+        this.y = random(height * 0.22, height * 0.72);
+        this.speed = random(0.25, 0.7) * (random() < 0.5 ? -1 : 1);
+        this.size = random(18, 34);
+        this.phase = random(TWO_PI);
+        this.alpha = random(35, 75);
+      }
+      update() {
+        this.x += this.speed;
+        this.y += sin(frameCount * 0.015 + this.phase) * 0.18;
+        if (this.x < -80 || this.x > width + 80) this.reset();
+      }
+      draw() {
+        push();
+        translate(this.x, this.y);
+        scale(this.speed >= 0 ? 1 : -1, 1);
+        noStroke();
+        fill(66, 103, 164, this.alpha);
+        ellipse(0, 0, this.size * 1.4, this.size);
+        triangle(-this.size * 0.95, 0, -this.size * 1.4, -this.size * 0.3, -this.size * 1.4, this.size * 0.3);
+        fill(255,255,255,this.alpha * 0.5);
+        circle(this.size * 0.34, -this.size * 0.12, this.size * 0.2);
+        fill(50, 77, 133, this.alpha);
+        circle(this.size * 0.38, -this.size * 0.12, this.size * 0.08);
+        pop();
+      }
+    }
+
+    class Fish {
+      constructor() { this.respawn(true); }
+      respawn(initial = false) {
+        this.type = random() < 0.12 ? 'gold' : random() < 0.34 ? 'rare' : 'common';
+        if (this.type === 'common') {
+          this.size = random(30, 40);
+          this.speed = random(0.8, 1.5) * (random() < 0.5 ? -1 : 1);
+          this.points = 1;
+          this.depthBias = random(0.48, 0.94);
+        } else if (this.type === 'rare') {
+          this.size = random(36, 48);
+          this.speed = random(1.2, 2.1) * (random() < 0.5 ? -1 : 1);
+          this.points = 2;
+          this.depthBias = random(0.34, 0.8);
+        } else {
+          this.size = random(34, 44);
+          this.speed = random(1.5, 2.3) * (random() < 0.5 ? -1 : 1);
+          this.points = 4;
+          this.depthBias = random(0.22, 0.62);
+        }
+        this.x = random(width * 0.05, width * 0.95);
+        this.y = lerp(height * 0.22, height * 0.95, this.depthBias);
+        this.phase = random(TWO_PI);
+        this.wiggle = random(0.7, 1.7);
+        this.sparkTimer = 0;
+        if (initial) this.x = random(width * 0.08, width * 0.92);
+      }
+      update() {
+        if (caughtFish === this) return;
+        this.x += this.speed;
+        this.phase += 0.045 * this.wiggle;
+        this.y += sin(this.phase) * 0.24;
+        if (this.type === 'gold') this.y += sin(frameCount * 0.05 + this.phase) * 0.22;
+        if (this.x < -90) this.x = width + 90;
+        if (this.x > width + 90) this.x = -90;
+        this.y = constrain(this.y, height * 0.22, height * 0.96);
+        this.sparkTimer *= 0.9;
+      }
+      sparkle() { this.sparkTimer = 1; }
+      draw() {
+        push();
+        translate(this.x, this.y);
+        scale(this.speed >= 0 ? 1 : -1, 1);
+        drawFishShape(this.type, 0, 0, this.size, 1 + this.sparkTimer * 0.08);
+        pop();
+      }
+    }
+
+    function drawFishShape(type, x, y, size, glowScale) {
+      push();
+      translate(x, y);
+      scale(glowScale);
+
+      let bodyA, bodyB, finColor, cheek, outline, backPatch;
+      if (type === 'gold') {
+        bodyA = color(242, 228, 154);
+        bodyB = color(102, 192, 217);
+        finColor = color(164, 210, 242, 170);
+        cheek = color(255, 236, 183, 72);
+        outline = color(128, 239, 155);
+        backPatch = color(143, 120, 196);
+      } else if (type === 'rare') {
+        bodyA = color(229, 224, 136);
+        bodyB = color(108, 185, 209);
+        finColor = color(173, 208, 245, 158);
+        cheek = color(255, 255, 255, 48);
+        outline = color(129, 237, 157);
+        backPatch = color(133, 111, 190);
+      } else {
+        bodyA = color(232, 226, 139);
+        bodyB = color(93, 182, 205);
+        finColor = color(181, 212, 245, 156);
+        cheek = color(255,255,255,40);
+        outline = color(129, 236, 160);
+        backPatch = color(136, 114, 193);
+      }
+
+      drawingContext.shadowColor = 'rgba(122, 219, 255, 0.16)';
+      drawingContext.shadowBlur = 12;
+      noStroke();
+
+      fill(outline);
+      ellipse(0, 0, size * 1.58, size * 1.1);
+      triangle(-size * 0.98, 0, -size * 1.48, -size * 0.4, -size * 1.48, size * 0.4);
+
+      fill(bodyA);
+      ellipse(-size * 0.03, 0, size * 1.38, size * 0.97);
+      fill(bodyB);
+      ellipse(size * 0.12, 0, size * 0.8, size * 0.84);
+      fill(backPatch);
+      arc(-size * 0.14, -size * 0.03, size * 0.98, size * 0.76, PI * 1.02, TWO_PI - 0.2, CHORD);
+
+      fill(finColor);
+      triangle(-size * 0.96, 0, -size * 1.35, -size * 0.32, -size * 1.35, size * 0.32);
+      ellipse(-size * 0.12, size * 0.11, size * 0.54, size * 0.28);
+      ellipse(-size * 0.04, -size * 0.16, size * 0.46, size * 0.18);
+
+      fill(255,255,255,72);
+      ellipse(size * 0.02, -size * 0.19, size * 0.56, size * 0.15);
+      fill(cheek);
+      ellipse(size * 0.1, size * 0.1, size * 0.26, size * 0.16);
+
+      fill(255);
+      circle(size * 0.34, -size * 0.12, size * 0.26);
+      fill(72, 84, 126);
+      circle(size * 0.39, -size * 0.12, size * 0.1);
+
+      fill(93, 111, 162, 90);
+      ellipse(size * 0.26, size * 0.13, size * 0.12, size * 0.06);
+      pop();
+    }
+
+    function detectPitchAutoCorr(buffer, sr) {
+      const SIZE = buffer.length;
+      let rms = 0;
+      for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
+      rms = Math.sqrt(rms / SIZE);
+      if (rms < 0.006) return { pitch: 0, confidence: 0 };
+
+      let mean = 0;
+      for (let i = 0; i < SIZE; i++) mean += buffer[i];
+      mean /= SIZE;
+
+      const minFreq = 60;
+      const maxFreq = 2200;
+      const minLag = Math.floor(sr / maxFreq);
+      const maxLag = Math.floor(sr / minFreq);
+
+      let bestLag = -1;
+      let bestCorr = 0;
+      let energy = 0;
+      for (let i = 0; i < SIZE; i++) {
+        const v = buffer[i] - mean;
+        energy += v * v;
+      }
+      if (energy === 0) return { pitch: 0, confidence: 0 };
+
+      for (let lag = minLag; lag <= maxLag; lag++) {
+        let corr = 0;
+        for (let i = 0; i < SIZE - lag; i++) {
+          const a = buffer[i] - mean;
+          const b = buffer[i + lag] - mean;
+          corr += a * b;
+        }
+        corr = corr / energy;
+        if (corr > bestCorr) {
+          bestCorr = corr;
+          bestLag = lag;
+        }
+      }
+
+      if (bestLag === -1 || bestCorr < 0.12) return { pitch: 0, confidence: 0 };
+
+      const c0 = localCorr(buffer, bestLag - 1, mean, energy);
+      const c1 = bestCorr;
+      const c2 = localCorr(buffer, bestLag + 1, mean, energy);
+      const denom = (2 * c1 - c0 - c2);
+      let shift = 0;
+      if (denom !== 0) shift = 0.5 * (c0 - c2) / denom;
+
+      const refinedLag = bestLag + shift;
+      const pitch = sr / refinedLag;
+      const confidence = constrain(map(bestCorr, 0.12, 0.82, 0, 1), 0, 1);
+      return { pitch, confidence };
+    }
+
+    function localCorr(buffer, lag, mean, energy) {
+      if (lag <= 0) return 0;
+      const SIZE = buffer.length;
+      if (lag >= SIZE) return 0;
+      let corr = 0;
+      for (let i = 0; i < SIZE - lag; i++) {
+        const a = buffer[i] - mean;
+        const b = buffer[i + lag] - mean;
+        corr += a * b;
+      }
+      return corr / energy;
+    }
+  </script>
+</body>
+</html>

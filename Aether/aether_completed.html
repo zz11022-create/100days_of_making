@@ -1,0 +1,1097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aether — A Soft Architecture for Digital Expression</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-1: #eef2f8;
+      --glass-base: rgba(255, 255, 255, 0.45);
+      --glass-strong: rgba(255, 255, 255, 0.75);
+      --rim-light: inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 0 20px rgba(255,255,255,0.2);
+
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-tertiary: #94a3b8;
+
+      --blur-heavy: 40px;
+      --blur-md: 20px;
+      --radius-full: 999px;
+      --radius-xl: 32px;
+      --radius-lg: 24px;
+
+      --spring-soft: cubic-bezier(0.25, 1, 0.3, 1);
+      --liquid-ease: cubic-bezier(0.65, 0, 0.15, 1);
+
+      --shadow-float: 0 20px 40px -10px rgba(148, 163, 184, 0.15), 0 0 10px rgba(148, 163, 184, 0.05);
+      --shadow-pressed: 0 2px 8px -2px rgba(148, 163, 184, 0.1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: var(--bg-1);
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .aurora-bg {
+      position: fixed;
+      inset: -20%;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(90px);
+      animation: slowShift 25s ease-in-out infinite alternate;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(141, 204, 255, 0.4), transparent 30%),
+        radial-gradient(circle at 80% 20%, rgba(167, 151, 255, 0.3), transparent 30%),
+        radial-gradient(circle at 50% 80%, rgba(130, 214, 220, 0.3), transparent 30%);
+    }
+
+    @keyframes slowShift {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.05) translate(-2%, 3%); }
+    }
+
+    .ghost-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .drifting-ghost {
+      position: absolute;
+      color: rgba(100, 116, 139, 0.2);
+      font-size: 1.5rem;
+      font-style: italic;
+      font-weight: 300;
+      white-space: nowrap;
+      filter: blur(2px);
+      animation: drift 40s linear infinite;
+    }
+
+    @keyframes drift {
+      from { transform: translateX(100vw) translateY(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 1; }
+      to   { transform: translateX(-50vw) translateY(-50px); opacity: 0; }
+    }
+
+    .app { position: relative; width: 100%; height: 100%; z-index: 2; }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.98);
+      transition: opacity 1.2s var(--spring-soft), transform 1.2s var(--spring-soft);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .screen.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+
+    .surface-copy {
+      position: absolute;
+      top: 15vh;
+      text-align: center;
+      z-index: 3;
+    }
+
+    .brand {
+      font-size: 0.8rem;
+      letter-spacing: 0.4em;
+      text-transform: uppercase;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      margin-bottom: 20px;
+    }
+
+    .tagline {
+      font-size: clamp(1.1rem, 1.3vw, 1.2rem);
+      font-weight: 300;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .begin-wrap { position: relative; width: 200px; height: 200px; display: grid; place-items: center; z-index: 10; }
+
+    .begin-btn {
+      width: 140px;
+      height: 140px;
+      border-radius: var(--radius-full);
+      background: var(--glass-strong);
+      backdrop-filter: blur(var(--blur-heavy));
+      -webkit-backdrop-filter: blur(var(--blur-heavy));
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: var(--shadow-float), var(--rim-light);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      transition: all 0.4s var(--spring-soft);
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .begin-btn span {
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      transition: opacity 0.3s ease;
+    }
+
+    .begin-btn:hover {
+      transform: scale(1.05);
+      box-shadow: 0 30px 60px -10px rgba(105, 171, 255, 0.3), var(--rim-light);
+    }
+
+    .water-membrane {
+      position: fixed;
+      border-radius: 50%;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.95) 0%, rgba(238, 242, 248, 0.8) 50%, transparent 80%);
+      transform: translate(-50%, -50%) scale(0);
+      z-index: 99;
+      pointer-events: none;
+      opacity: 0;
+      transition: transform 1.8s var(--liquid-ease), opacity 1.8s ease;
+    }
+
+    .water-membrane.expand {
+      transform: translate(-50%, -50%) scale(50);
+      opacity: 1;
+    }
+
+    .ripple-burst {
+      position: fixed;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.8);
+      transform: translate(-50%, -50%) scale(0.1);
+      z-index: 98;
+      pointer-events: none;
+      animation: burstOut 1.2s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+    }
+
+    @keyframes burstOut {
+      0%   { opacity: 1; transform: translate(-50%,-50%) scale(0.5); border-width: 4px; }
+      100% { opacity: 0; transform: translate(-50%,-50%) scale(4); border-width: 0px; }
+    }
+
+    .pool-layout,
+    .space-layout {
+      width: 100%;
+      max-width: 1120px;
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 32px;
+      height: 80vh;
+    }
+
+    .glass-panel {
+      background: var(--glass-base);
+      backdrop-filter: blur(var(--blur-heavy));
+      -webkit-backdrop-filter: blur(var(--blur-heavy));
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-float), var(--rim-light);
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-tertiary); margin-bottom: 8px; }
+    .headline { font-size: 1.6rem; font-weight: 400; letter-spacing: -0.02em; color: var(--text-primary); margin-bottom: 12px; }
+    .subtext { font-size: 0.95rem; font-weight: 300; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+
+    .input-shell {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      margin-bottom: 24px;
+      border-radius: var(--radius-lg);
+      background: radial-gradient(circle at top left, rgba(255,255,255,0.4), transparent 70%);
+      padding: 24px;
+      transition: background 1.5s ease;
+      min-height: 0;
+    }
+
+    textarea {
+      width: 100%;
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: inherit;
+      font-size: 1.15rem;
+      font-weight: 300;
+      color: var(--text-primary);
+      line-height: 1.8;
+      transition: filter 1.5s var(--spring-soft);
+    }
+
+    textarea::placeholder { color: var(--text-tertiary); font-weight: 300; }
+    textarea.focused { filter: blur(4px); }
+    textarea.solid { filter: blur(0px) !important; }
+
+    .btn-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+    .soft-btn {
+      padding: 12px 24px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.6);
+      border: none;
+      box-shadow: var(--rim-light), var(--shadow-pressed);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s var(--spring-soft);
+    }
+
+    .soft-btn:hover {
+      background: rgba(255,255,255,0.95);
+      color: var(--text-primary);
+      transform: translateY(-2px);
+      box-shadow: var(--rim-light), var(--shadow-float);
+    }
+
+    .soft-btn.primary { background: rgba(141, 184, 255, 0.4); border: 1px solid rgba(141, 184, 255, 0.6); color: var(--text-primary); }
+    .soft-btn.primary:hover { background: rgba(141, 184, 255, 0.7); }
+
+    .soft-btn.subtle { background: rgba(255,255,255,0.35); }
+
+    .side-stack { display: flex; flex-direction: column; gap: 20px; min-height: 0; }
+
+    .mini-panel {
+      background: rgba(255,255,255,0.3);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--rim-light);
+    }
+
+    .mini-title { font-size: 0.75rem; font-weight: 600; color: var(--text-primary); margin-bottom: 16px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    .slider-group label { display: flex; flex-direction: column; gap: 8px; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 16px; }
+    input[type=range] {
+      appearance: none; -webkit-appearance: none; width: 100%; height: 4px; border-radius: 2px;
+      background: rgba(148, 163, 184, 0.2); outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      appearance: none; -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer;
+    }
+
+    .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.4);
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      cursor: pointer; transition: all 0.3s;
+    }
+    .chip:hover { background: rgba(255,255,255,0.8); }
+    .chip.active { background: white; color: var(--text-primary); box-shadow: var(--shadow-pressed); }
+
+    .solid-card {
+      width: 100%;
+      max-width: 760px;
+      padding: 48px;
+    }
+
+    .solid-meta { display: flex; gap: 10px; margin-top: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+    .meta-badge {
+      padding: 6px 14px; border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.8);
+      font-size: 0.75rem; color: var(--text-secondary);
+    }
+
+    #solidText { font-size: 1.25rem; font-weight: 300; line-height: 1.7; color: var(--text-primary); margin-bottom: 40px; }
+
+    .destinations { display: flex; flex-direction: column; gap: 16px; margin-bottom: 32px; }
+    .destination {
+      padding: 24px; border-radius: var(--radius-lg);
+      background: rgba(255,255,255,0.4);
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+      box-shadow: var(--rim-light); transition: all 0.3s;
+    }
+    .destination:hover { background: rgba(255,255,255,0.7); transform: translateY(-2px); box-shadow: var(--shadow-float), var(--rim-light); }
+    .destination h3 { font-size: 1rem; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; }
+    .destination p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.5; }
+
+    .space-hero {
+      padding-bottom: 26px;
+      border-bottom: 1px solid rgba(255,255,255,0.35);
+      margin-bottom: 24px;
+    }
+
+    .stream-list,
+    .lab-stack,
+    .cocoon-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+      overflow: auto;
+      padding-right: 6px;
+    }
+
+    .stream-list::-webkit-scrollbar,
+    .lab-stack::-webkit-scrollbar,
+    .cocoon-stack::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .stream-list::-webkit-scrollbar-thumb,
+    .lab-stack::-webkit-scrollbar-thumb,
+    .cocoon-stack::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.25);
+      border-radius: 999px;
+    }
+
+    .nebula-card,
+    .lab-module,
+    .cocoon-module {
+      background: rgba(255,255,255,0.32);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--rim-light);
+      transition: all 0.3s var(--spring-soft);
+    }
+
+    .nebula-card:hover,
+    .lab-module:hover,
+    .cocoon-module:hover {
+      transform: translateY(-2px);
+      background: rgba(255,255,255,0.45);
+      box-shadow: var(--rim-light), var(--shadow-float);
+    }
+
+    .nebula-top,
+    .module-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nebula-title,
+    .module-title {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-primary);
+    }
+
+    .nebula-copy,
+    .module-copy,
+    .module-note,
+    .cocoon-copy {
+      font-size: 0.92rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    .resonance-row,
+    .signal-row,
+    .privacy-row,
+    .lab-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .resonance-pill,
+    .signal-pill,
+    .status-pill {
+      padding: 6px 12px;
+      border-radius: var(--radius-full);
+      background: rgba(255,255,255,0.48);
+      border: 1px solid rgba(255,255,255,0.55);
+      font-size: 0.74rem;
+      color: var(--text-secondary);
+    }
+
+    .ghost-notes {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .ghost-fragment {
+      min-height: 112px;
+      border-radius: 20px;
+      padding: 16px;
+      background: rgba(255,255,255,0.25);
+      box-shadow: var(--rim-light);
+      font-size: 0.84rem;
+      color: rgba(100, 116, 139, 0.9);
+      line-height: 1.6;
+      font-style: italic;
+    }
+
+    .divider-soft {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+      margin: 6px 0;
+    }
+
+    .helper-bar {
+      position: fixed; bottom: 32px;
+      background: rgba(255,255,255,0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      padding: 10px 24px; border-radius: var(--radius-full);
+      font-size: 0.8rem; font-weight: 500; color: var(--text-secondary);
+      box-shadow: var(--shadow-pressed), var(--rim-light); pointer-events: none; z-index: 999;
+    }
+
+    @media (max-width: 980px) {
+      html, body { overflow: auto; }
+      .screen { position: relative; min-height: 100vh; padding: 24px; }
+      .pool-layout,
+      .space-layout { grid-template-columns: 1fr; height: auto; }
+      .ghost-notes { grid-template-columns: 1fr; }
+      .destination { flex-direction: column; align-items: flex-start; }
+      .helper-bar { left: 16px; right: 16px; bottom: 16px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="aurora-bg"></div>
+
+  <div class="ghost-layer">
+    <div class="drifting-ghost" style="top: 20%; animation-delay: 0s;">"Maybe softness can be a protocol..."</div>
+    <div class="drifting-ghost" style="top: 60%; animation-delay: 15s;">"I want room to hesitate before I become visible."</div>
+    <div class="drifting-ghost" style="top: 80%; animation-delay: 30s;">"What if feedback felt like weather?"</div>
+  </div>
+
+  <div class="water-membrane" id="waterMembrane"></div>
+
+  <div class="app">
+
+    <section class="screen active" id="surfaceScreen">
+      <div class="surface-copy">
+        <div class="brand">Aether</div>
+        <p class="tagline">A soft architecture for digital expression.<br>Where unfinished thoughts are protected.</p>
+      </div>
+
+      <div class="begin-wrap">
+        <button class="begin-btn" id="beginBtn">
+          <span>Begin a Thought</span>
+        </button>
+      </div>
+    </section>
+
+    <section class="screen" id="poolScreen">
+      <div class="pool-layout">
+        <div class="glass-panel">
+          <div>
+            <div class="kicker">Incubation</div>
+            <h1 class="headline">Start with a feeling.</h1>
+            <p class="subtext">Your words begin as a soft blur. Focus on weight and mood before precision. Hold the button to solidify when ready.</p>
+          </div>
+
+          <div class="input-shell" id="inputShell">
+            <textarea id="thoughtInput" placeholder="Drop a fragment here..."></textarea>
+          </div>
+
+          <div class="btn-row">
+            <button class="soft-btn primary" id="holdBtn">Hold to Solidify</button>
+            <button class="soft-btn" id="clearBtn">Dissolve (Sedimentation)</button>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <div class="mini-panel">
+            <div class="mini-title">Emotional Tinting</div>
+            <div class="slider-group">
+              <label>Warmth <input type="range" min="0" max="100" value="38" id="warmthRange"></label>
+              <label>Calmness <input type="range" min="0" max="100" value="62" id="calmRange"></label>
+            </div>
+          </div>
+          <div class="mini-panel" style="flex: 1;">
+            <div class="mini-title">Intent Fragments</div>
+            <div class="chip-grid" id="chips">
+              <div class="chip active">gentle question</div>
+              <div class="chip">early idea</div>
+              <div class="chip">visual direction</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="solidScreen">
+      <div class="glass-panel solid-card">
+        <div class="kicker">Solidified</div>
+        <div class="solid-meta">
+          <div class="meta-badge" id="moodBadge">Mood Tint Applied</div>
+          <div class="meta-badge" id="intentBadge">Intent: gentle question</div>
+        </div>
+        <p id="solidText">Your thought will appear here.</p>
+
+        <div class="destinations">
+          <div class="destination">
+            <div>
+              <h3>Evolution Lab (Layer 3)</h3>
+              <p>Evolve visually with soft review, ghost layers, and non-destructive experimentation.</p>
+            </div>
+            <button class="soft-btn route-btn" data-target="labScreen">Enter Lab</button>
+          </div>
+          <div class="destination">
+            <div>
+              <h3>Store in the Cocoon (Layer 4)</h3>
+              <p>Keep it entirely private. Wait until the thought is ready for light.</p>
+            </div>
+            <button class="soft-btn route-btn" data-target="cocoonScreen">Keep Private</button>
+          </div>
+          <div class="destination">
+            <div>
+              <h3>Release to Nebula (Layer 4)</h3>
+              <p>Share as a soft, semi-transparent fragment to seek anonymous resonance.</p>
+            </div>
+            <button class="soft-btn route-btn" data-target="nebulaScreen">Seek Resonance</button>
+          </div>
+        </div>
+
+        <button class="soft-btn" id="backToPoolBtn">Return to Thought Pool</button>
+      </div>
+    </section>
+
+    <section class="screen" id="nebulaScreen">
+      <div class="space-layout">
+        <div class="glass-panel">
+          <div class="space-hero">
+            <div class="kicker">Nebula</div>
+            <h1 class="headline">Low-pressure sharing for unfinished signals.</h1>
+            <p class="subtext">Fragments arrive here translucent and unfinished. Nothing asks for a final opinion. The system only listens for resonance.</p>
+          </div>
+
+          <div class="stream-list">
+            <div class="nebula-card">
+              <div class="nebula-top">
+                <div class="nebula-title">Your released fragment</div>
+                <div class="status-pill">semi-visible</div>
+              </div>
+              <p class="nebula-copy" id="nebulaThought">A released thought will appear here as a soft public fragment.</p>
+              <div class="resonance-row">
+                <div class="resonance-pill" id="nebulaIntent">intent</div>
+                <div class="resonance-pill" id="nebulaMood">mood</div>
+                <div class="resonance-pill">visibility: 42%</div>
+              </div>
+              <div class="signal-row">
+                <button class="soft-btn subtle" id="pulseSignalBtn">Send a pulse</button>
+                <button class="soft-btn subtle" id="fadeNebulaBtn">Let it fade</button>
+              </div>
+            </div>
+
+            <div class="nebula-card">
+              <div class="nebula-top">
+                <div class="nebula-title">Ambient resonance</div>
+                <div class="status-pill" id="pulseCount">3 soft echoes</div>
+              </div>
+              <p class="nebula-copy">Other people do not answer with comments here. They answer with subtle signals that feel closer to weather than judgment.</p>
+              <div class="resonance-row">
+                <div class="resonance-pill">curiosity nearby</div>
+                <div class="resonance-pill">quiet agreement</div>
+                <div class="resonance-pill">held in orbit</div>
+              </div>
+            </div>
+
+            <div class="nebula-card">
+              <div class="nebula-top">
+                <div class="nebula-title">Soft circulation</div>
+                <div class="status-pill">no hard feed</div>
+              </div>
+              <p class="nebula-copy">Instead of ranking, Aether lets fragments drift. The more gentle the response, the longer the idea remains suspended in view.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <div class="mini-panel">
+            <div class="mini-title">Current Signal</div>
+            <div class="chip-grid">
+              <div class="chip active">resonance only</div>
+              <div class="chip">anonymous drift</div>
+              <div class="chip">no hard replies</div>
+            </div>
+          </div>
+          <div class="mini-panel" style="flex: 1;">
+            <div class="mini-title">Return Paths</div>
+            <div class="lab-actions">
+              <button class="soft-btn" data-back="solidScreen">Back to Routing</button>
+              <button class="soft-btn" data-back="poolScreen">Return to Pool</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="labScreen">
+      <div class="space-layout">
+        <div class="glass-panel">
+          <div class="space-hero">
+            <div class="kicker">Evolution Lab</div>
+            <h1 class="headline">A space for branching, testing, and gentle revision.</h1>
+            <p class="subtext">The Lab keeps history visible without freezing the thought in place. Each pass is a layer, not a replacement.</p>
+          </div>
+
+          <div class="lab-stack">
+            <div class="lab-module">
+              <div class="module-top">
+                <div class="module-title">Current core thought</div>
+                <div class="status-pill">active layer</div>
+              </div>
+              <p class="module-copy" id="labThought">Your solidified thought will appear here for branching.</p>
+              <div class="lab-actions">
+                <button class="soft-btn subtle" id="branchWhyBtn">Branch through Why</button>
+                <button class="soft-btn subtle" id="branchHowBtn">Branch through How</button>
+                <button class="soft-btn subtle" id="branchHistoryBtn">Branch through History</button>
+              </div>
+            </div>
+
+            <div class="lab-module">
+              <div class="module-top">
+                <div class="module-title">Ghost layers</div>
+                <div class="status-pill" id="branchLabel">waiting for a branch</div>
+              </div>
+              <p class="module-note">These layers keep earlier versions visible as blurred traces, so change feels additive rather than destructive.</p>
+              <div class="ghost-notes">
+                <div class="ghost-fragment" id="ghostWhy">Why-layer waits for intention.</div>
+                <div class="ghost-fragment" id="ghostHow">How-layer waits for form.</div>
+                <div class="ghost-fragment" id="ghostHistory">History-layer waits for context.</div>
+              </div>
+            </div>
+
+            <div class="lab-module">
+              <div class="module-top">
+                <div class="module-title">Soft review protocol</div>
+                <div class="status-pill">non-destructive</div>
+              </div>
+              <p class="module-copy">Feedback in the Lab appears as halos, not verdicts. A thought can glow with possibility before it is ever edited.</p>
+              <div class="resonance-row">
+                <div class="resonance-pill">expand this metaphor</div>
+                <div class="resonance-pill">hold the emotional tone</div>
+                <div class="resonance-pill">keep ambiguity alive</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <div class="mini-panel">
+            <div class="mini-title">Branch Axes</div>
+            <div class="chip-grid">
+              <div class="chip active">why</div>
+              <div class="chip">how</div>
+              <div class="chip">history</div>
+            </div>
+          </div>
+          <div class="mini-panel" style="flex: 1;">
+            <div class="mini-title">Return Paths</div>
+            <div class="lab-actions">
+              <button class="soft-btn" data-back="solidScreen">Back to Routing</button>
+              <button class="soft-btn" data-back="poolScreen">Return to Pool</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="cocoonScreen">
+      <div class="space-layout">
+        <div class="glass-panel">
+          <div class="space-hero">
+            <div class="kicker">Cocoon</div>
+            <h1 class="headline">A protected chamber for private incubation.</h1>
+            <p class="subtext">Some thoughts are not meant for exposure yet. Here they rest under adjustable softness, with privacy treated as an active material.</p>
+          </div>
+
+          <div class="cocoon-stack">
+            <div class="cocoon-module">
+              <div class="module-top">
+                <div class="module-title">Stored thought</div>
+                <div class="status-pill">private shell</div>
+              </div>
+              <p class="cocoon-copy" id="cocoonThought">Your private fragment will be held here.</p>
+              <div class="privacy-row">
+                <div class="resonance-pill" id="cocoonIntent">intent</div>
+                <div class="resonance-pill">visibility: inward</div>
+                <div class="resonance-pill">external access: closed</div>
+              </div>
+            </div>
+
+            <div class="cocoon-module">
+              <div class="module-top">
+                <div class="module-title">Softness controls</div>
+                <div class="status-pill">adaptive shelter</div>
+              </div>
+              <div class="slider-group" style="margin-top: 8px;">
+                <label>Opacity Shelter <input type="range" min="0" max="100" value="72" id="cocoonOpacity"></label>
+                <label>Comment Softening <input type="range" min="0" max="100" value="84" id="cocoonSoftening"></label>
+              </div>
+              <p class="module-note" id="softeningNote">Potentially sharp language would be translated into a gentler internal phrasing before it reaches this room.</p>
+            </div>
+
+            <div class="cocoon-module">
+              <div class="module-top">
+                <div class="module-title">Future release options</div>
+                <div class="status-pill">not yet public</div>
+              </div>
+              <p class="module-copy">A cocooned thought can remain private, move back to the Lab for further shaping, or later drift into Nebula without losing its emotional context.</p>
+              <div class="lab-actions">
+                <button class="soft-btn subtle" id="moveToLabBtn">Move to Evolution Lab</button>
+                <button class="soft-btn subtle" id="releaseToNebulaBtn">Release softly to Nebula</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="side-stack">
+          <div class="mini-panel">
+            <div class="mini-title">Privacy Protocol</div>
+            <div class="chip-grid">
+              <div class="chip active">private by default</div>
+              <div class="chip">soft translation</div>
+              <div class="chip">adjustable shell</div>
+            </div>
+          </div>
+          <div class="mini-panel" style="flex: 1;">
+            <div class="mini-title">Return Paths</div>
+            <div class="lab-actions">
+              <button class="soft-btn" data-back="solidScreen">Back to Routing</button>
+              <button class="soft-btn" data-back="poolScreen">Return to Pool</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="helper-bar" id="helperText">Tip: click the button to pass through the soft layer.</div>
+  </div>
+
+  <script>
+    const beginBtn = document.getElementById('beginBtn');
+    const waterMembrane = document.getElementById('waterMembrane');
+    const helperText = document.getElementById('helperText');
+    const thoughtInput = document.getElementById('thoughtInput');
+    const inputShell = document.getElementById('inputShell');
+    const chips = document.getElementById('chips');
+    const holdBtn = document.getElementById('holdBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const backToPoolBtn = document.getElementById('backToPoolBtn');
+    const solidText = document.getElementById('solidText');
+    const intentBadge = document.getElementById('intentBadge');
+    const moodBadge = document.getElementById('moodBadge');
+    const warmthRange = document.getElementById('warmthRange');
+    const calmRange = document.getElementById('calmRange');
+
+    const nebulaThought = document.getElementById('nebulaThought');
+    const nebulaIntent = document.getElementById('nebulaIntent');
+    const nebulaMood = document.getElementById('nebulaMood');
+    const pulseCount = document.getElementById('pulseCount');
+    const pulseSignalBtn = document.getElementById('pulseSignalBtn');
+    const fadeNebulaBtn = document.getElementById('fadeNebulaBtn');
+
+    const labThought = document.getElementById('labThought');
+    const ghostWhy = document.getElementById('ghostWhy');
+    const ghostHow = document.getElementById('ghostHow');
+    const ghostHistory = document.getElementById('ghostHistory');
+    const branchLabel = document.getElementById('branchLabel');
+    const branchWhyBtn = document.getElementById('branchWhyBtn');
+    const branchHowBtn = document.getElementById('branchHowBtn');
+    const branchHistoryBtn = document.getElementById('branchHistoryBtn');
+
+    const cocoonThought = document.getElementById('cocoonThought');
+    const cocoonIntent = document.getElementById('cocoonIntent');
+    const cocoonOpacity = document.getElementById('cocoonOpacity');
+    const cocoonSoftening = document.getElementById('cocoonSoftening');
+    const softeningNote = document.getElementById('softeningNote');
+    const moveToLabBtn = document.getElementById('moveToLabBtn');
+    const releaseToNebulaBtn = document.getElementById('releaseToNebulaBtn');
+
+    const screens = [...document.querySelectorAll('.screen')];
+    const routeButtons = [...document.querySelectorAll('.route-btn')];
+    const backButtons = [...document.querySelectorAll('[data-back]')];
+
+    let holdTimer = null;
+    let currentIntent = 'gentle question';
+    let pulseTotal = 3;
+    let currentThought = 'An unfinished thought became visible through softness.';
+
+    function showScreen(targetId) {
+      screens.forEach(screen => screen.classList.toggle('active', screen.id === targetId));
+    }
+
+    function createRipple(x, y) {
+      const burst = document.createElement('div');
+      burst.className = 'ripple-burst';
+      burst.style.left = x + 'px';
+      burst.style.top = y + 'px';
+      document.body.appendChild(burst);
+      setTimeout(() => burst.remove(), 1200);
+    }
+
+    function getMoodLabel() {
+      return `Warmth ${warmthRange.value} · Calm ${calmRange.value}`;
+    }
+
+    function getThoughtText() {
+      return thoughtInput.value.trim() || 'An unfinished thought became visible through softness.';
+    }
+
+    function syncThoughtAcrossSpaces() {
+      currentThought = getThoughtText();
+      solidText.innerText = currentThought;
+      intentBadge.innerText = `Intent: ${currentIntent}`;
+      moodBadge.innerText = getMoodLabel();
+
+      nebulaThought.innerText = currentThought;
+      nebulaIntent.innerText = `intent: ${currentIntent}`;
+      nebulaMood.innerText = getMoodLabel();
+
+      labThought.innerText = currentThought;
+
+      cocoonThought.innerText = currentThought;
+      cocoonIntent.innerText = `intent: ${currentIntent}`;
+    }
+
+    function updateSofteningNote() {
+      const softness = Number(cocoonSoftening.value);
+      if (softness > 75) {
+        softeningNote.innerText = 'Potentially sharp language would be translated into a gentle internal phrasing before it reaches this room.';
+      } else if (softness > 45) {
+        softeningNote.innerText = 'Comments would arrive softened, but still keep some of their original edge for reflection.';
+      } else {
+        softeningNote.innerText = 'The cocoon is allowing a clearer, less-filtered version of outside language to pass through.';
+      }
+    }
+
+    function applyCocoonOpacity() {
+      const shell = 0.18 + Number(cocoonOpacity.value) / 160;
+      document.querySelectorAll('#cocoonScreen .cocoon-module').forEach(module => {
+        module.style.background = `rgba(255,255,255,${shell.toFixed(2)})`;
+      });
+    }
+
+    function setBranch(type) {
+      const text = getThoughtText();
+      const trimmed = text.length > 110 ? text.slice(0, 110) + '…' : text;
+
+      ghostWhy.innerText = `Why this matters: ${currentIntent} may be pointing toward a deeper need hiding underneath “${trimmed}”`;
+      ghostHow.innerText = `How it could form: the fragment could become a softer flow, a card, or a branching interaction instead of a single post.`;
+      ghostHistory.innerText = `What led here: this thought may carry earlier hesitation, previous drafts, or emotional residue that still deserves visibility.`;
+
+      if (type === 'why') {
+        branchLabel.innerText = 'branching through Why';
+        ghostWhy.style.background = 'rgba(255,255,255,0.42)';
+        ghostHow.style.background = 'rgba(255,255,255,0.25)';
+        ghostHistory.style.background = 'rgba(255,255,255,0.25)';
+      } else if (type === 'how') {
+        branchLabel.innerText = 'branching through How';
+        ghostWhy.style.background = 'rgba(255,255,255,0.25)';
+        ghostHow.style.background = 'rgba(255,255,255,0.42)';
+        ghostHistory.style.background = 'rgba(255,255,255,0.25)';
+      } else {
+        branchLabel.innerText = 'branching through History';
+        ghostWhy.style.background = 'rgba(255,255,255,0.25)';
+        ghostHow.style.background = 'rgba(255,255,255,0.25)';
+        ghostHistory.style.background = 'rgba(255,255,255,0.42)';
+      }
+    }
+
+    beginBtn.addEventListener('click', () => {
+      const rect = beginBtn.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+
+      createRipple(cx, cy);
+      beginBtn.querySelector('span').style.opacity = '0';
+      waterMembrane.style.left = cx + 'px';
+      waterMembrane.style.top = cy + 'px';
+      waterMembrane.classList.remove('expand');
+      void waterMembrane.offsetWidth;
+      waterMembrane.classList.add('expand');
+
+      helperText.textContent = 'Entering the incubation space...';
+
+      setTimeout(() => {
+        showScreen('poolScreen');
+        thoughtInput.focus();
+        thoughtInput.classList.add('focused');
+        helperText.textContent = 'Type freely. The text stays blurred to lower pressure.';
+      }, 700);
+
+      setTimeout(() => {
+        waterMembrane.style.opacity = '0';
+        setTimeout(() => waterMembrane.classList.remove('expand'), 1800);
+      }, 1500);
+    });
+
+    thoughtInput.addEventListener('focus', () => {
+      if (!thoughtInput.classList.contains('solid')) thoughtInput.classList.add('focused');
+    });
+
+    thoughtInput.addEventListener('input', () => {
+      const length = thoughtInput.value.trim().length;
+      const blurStrength = length > 80 ? 2 : length > 20 ? 3 : 5;
+      if (!thoughtInput.classList.contains('solid')) {
+        thoughtInput.style.filter = `blur(${blurStrength}px)`;
+      }
+
+      const hueShift = 200 + (length * 0.5);
+      inputShell.style.background = `radial-gradient(circle at top left, hsla(${hueShift}, 80%, 95%, 0.6), transparent 70%)`;
+      syncThoughtAcrossSpaces();
+    });
+
+    chips.addEventListener('click', (e) => {
+      const chip = e.target.closest('.chip');
+      if (!chip) return;
+      [...chips.querySelectorAll('.chip')].forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentIntent = chip.innerText;
+      syncThoughtAcrossSpaces();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      thoughtInput.value = '';
+      thoughtInput.classList.remove('solid');
+      thoughtInput.classList.add('focused');
+      thoughtInput.style.filter = 'blur(5px)';
+      thoughtInput.focus();
+      inputShell.style.background = 'radial-gradient(circle at top left, rgba(255,255,255,0.4), transparent 70%)';
+      syncThoughtAcrossSpaces();
+      helperText.textContent = 'The thought has sedimented back into the aether.';
+    });
+
+    const startHold = () => {
+      holdBtn.style.transform = 'scale(0.95)';
+      helperText.textContent = 'Holding... letting the fragment take shape.';
+
+      holdTimer = setTimeout(() => {
+        thoughtInput.classList.add('solid');
+        syncThoughtAcrossSpaces();
+        setBranch('why');
+        showScreen('solidScreen');
+        helperText.textContent = 'Thought solidified. Choose its next path.';
+      }, 1200);
+    };
+
+    const cancelHold = () => {
+      holdBtn.style.transform = 'scale(1)';
+      clearTimeout(holdTimer);
+      if (document.getElementById('poolScreen').classList.contains('active')) {
+        helperText.textContent = 'Hold the primary button to solidify.';
+      }
+    };
+
+    holdBtn.addEventListener('mousedown', startHold);
+    holdBtn.addEventListener('touchstart', startHold, { passive: true });
+    holdBtn.addEventListener('mouseup', cancelHold);
+    holdBtn.addEventListener('mouseleave', cancelHold);
+    holdBtn.addEventListener('touchend', cancelHold);
+
+    backToPoolBtn.addEventListener('click', () => {
+      showScreen('poolScreen');
+      helperText.textContent = 'Returned to the pool. The thought is fluid again.';
+    });
+
+    routeButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        syncThoughtAcrossSpaces();
+        showScreen(button.dataset.target);
+
+        if (button.dataset.target === 'nebulaScreen') {
+          helperText.textContent = 'Your fragment is drifting through Nebula.';
+        } else if (button.dataset.target === 'labScreen') {
+          helperText.textContent = 'The Evolution Lab is ready for branching.';
+        } else if (button.dataset.target === 'cocoonScreen') {
+          helperText.textContent = 'Your fragment is now resting inside the Cocoon.';
+        }
+      });
+    });
+
+    backButtons.forEach(button => {
+      button.addEventListener('click', () => {
+        showScreen(button.dataset.back);
+        helperText.textContent = button.dataset.back === 'solidScreen'
+          ? 'Returned to routing. Choose the next path for this thought.'
+          : 'Returned to the pool. The thought is fluid again.';
+      });
+    });
+
+    pulseSignalBtn.addEventListener('click', () => {
+      pulseTotal += 1;
+      pulseCount.innerText = `${pulseTotal} soft echoes`;
+      helperText.textContent = 'A quiet pulse moved outward through Nebula.';
+    });
+
+    fadeNebulaBtn.addEventListener('click', () => {
+      nebulaThought.innerText = 'This fragment is fading back into ambient circulation.';
+      helperText.textContent = 'The released thought is dissolving gently into the background.';
+    });
+
+    branchWhyBtn.addEventListener('click', () => {
+      setBranch('why');
+      helperText.textContent = 'The Lab is exploring the deeper reason beneath the fragment.';
+    });
+
+    branchHowBtn.addEventListener('click', () => {
+      setBranch('how');
+      helperText.textContent = 'The Lab is exploring possible forms and interactions.';
+    });
+
+    branchHistoryBtn.addEventListener('click', () => {
+      setBranch('history');
+      helperText.textContent = 'The Lab is tracing the emotional history of the fragment.';
+    });
+
+    cocoonOpacity.addEventListener('input', applyCocoonOpacity);
+    cocoonSoftening.addEventListener('input', updateSofteningNote);
+
+    moveToLabBtn.addEventListener('click', () => {
+      syncThoughtAcrossSpaces();
+      showScreen('labScreen');
+      helperText.textContent = 'The cocooned thought has moved back into the Evolution Lab.';
+    });
+
+    releaseToNebulaBtn.addEventListener('click', () => {
+      syncThoughtAcrossSpaces();
+      showScreen('nebulaScreen');
+      helperText.textContent = 'The protected fragment has been released softly into Nebula.';
+    });
+
+    warmthRange.addEventListener('input', syncThoughtAcrossSpaces);
+    calmRange.addEventListener('input', syncThoughtAcrossSpaces);
+
+    syncThoughtAcrossSpaces();
+    updateSofteningNote();
+    applyCocoonOpacity();
+    setBranch('why');
+  </script>
+</body>
+</html>
