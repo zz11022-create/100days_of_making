@@ -1,0 +1,1361 @@
+<html lang="en" vid="0">
+
+<head vid="1">
+    <meta charset="UTF-8" vid="2">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" vid="3">
+    <title vid="4">Soleluxe - MVP</title>
+    <style vid="5">
+         :root {
+            --neon: #D4FF1E;
+            --black: #000000;
+            --white: #FFFFFF;
+            --off-white: #F0EBE1;
+            --border: 1px solid var(--black);
+            --font-system: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --space-xs: 0.5rem;
+            --space-sm: 1rem;
+            --space-md: 2rem;
+            --space-lg: 4rem;
+            --space-xl: 8rem;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: var(--font-system);
+            background-color: var(--white);
+            color: var(--black);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+        
+        .font-display {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+            line-height: 0.9;
+        }
+        
+        .font-body {
+            font-size: 0.9rem;
+            font-weight: 400;
+            letter-spacing: 0.01em;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: var(--neon);
+            color: var(--black);
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1;
+        }
+        
+        .grid-container {
+            border-left: var(--border);
+            border-right: var(--border);
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: var(--white);
+            border-bottom: var(--border);
+            z-index: 100;
+            height: 60px;
+        }
+        
+        .nav-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100%;
+            max-width: 1600px;
+            margin: 0 auto;
+            border-left: var(--border);
+            border-right: var(--border);
+        }
+        
+        .nav-col {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-md);
+        }
+        
+        .nav-center {
+            justify-content: center;
+            border-left: var(--border);
+            border-right: var(--border);
+        }
+        
+        .nav-right {
+            justify-content: flex-end;
+            gap: var(--space-md);
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            text-decoration: none;
+            color: var(--black);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: var(--space-md);
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: var(--black);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            position: relative;
+            padding: var(--space-xs) 0;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--neon);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+        
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        
+        main {
+            margin-top: 60px;
+        }
+        
+        .hero {
+            height: calc(100vh - 60px);
+            display: flex;
+            flex-direction: column;
+            border-bottom: var(--border);
+            position: relative;
+            background-color: var(--off-white);
+            overflow: hidden;
+        }
+        
+        .hero-image-container {
+            flex: 1;
+            width: 100%;
+            position: relative;
+        }
+        
+        .hero-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: contrast(1.1) saturate(1.2);
+        }
+        
+        .hero-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: var(--space-md);
+            pointer-events: none;
+        }
+        
+        .hero-text {
+            font-size: clamp(3rem, 8vw, 8rem);
+            text-align: center;
+            color: var(--white);
+            mix-blend-mode: exclusion;
+            max-width: 90%;
+            margin-bottom: var(--space-md);
+        }
+        
+        .btn-ghost {
+            pointer-events: auto;
+            border: 1px solid var(--white);
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s ease;
+            background: transparent;
+            backdrop-filter: blur(4px);
+        }
+        
+        .btn-ghost:hover {
+            background-color: var(--neon);
+            border-color: var(--neon);
+            color: var(--black);
+        }
+        
+        .section-header {
+            padding: var(--space-sm) var(--space-md);
+            border-bottom: var(--border);
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .trending-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            border-bottom: var(--border);
+        }
+        
+        .product-card {
+            border-right: var(--border);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: var(--white);
+            transition: border-color 0.2s;
+        }
+        
+        .product-card:last-child {
+            border-right: none;
+        }
+        
+        .product-card::before {
+            content: '';
+            position: absolute;
+            inset: -1px;
+            border: 1px solid transparent;
+            z-index: 10;
+            pointer-events: none;
+            transition: border-color 0.2s ease;
+        }
+        
+        .product-card:hover::before {
+            border-color: var(--neon);
+        }
+        
+        .product-image-wrap {
+            aspect-ratio: 1;
+            background-color: var(--off-white);
+            padding: var(--space-md);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+        
+        .product-card .tag {
+            position: absolute;
+            top: var(--space-sm);
+            left: var(--space-sm);
+            z-index: 2;
+        }
+        
+        .product-info {
+            padding: var(--space-sm);
+            border-top: var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .product-name {
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+        
+        .product-price {
+            font-weight: 400;
+            font-size: 0.85rem;
+        }
+        
+        .mission {
+            padding: var(--space-xl) var(--space-md);
+            text-align: center;
+            border-bottom: var(--border);
+        }
+        
+        .mission-text {
+            font-size: clamp(2rem, 4vw, 4rem);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .lab-section {
+            display: flex;
+            height: 85vh;
+            border-bottom: var(--border);
+        }
+        
+        .lab-canvas {
+            flex: 6;
+            border-right: var(--border);
+            background-color: var(--off-white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .lab-canvas img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
+        }
+        
+        .lab-panel {
+            flex: 4;
+            display: flex;
+            flex-direction: column;
+            background: var(--white);
+        }
+        
+        .lab-tabs {
+            display: flex;
+            border-bottom: var(--border);
+        }
+        
+        .lab-tab {
+            flex: 1;
+            padding: var(--space-sm);
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border-right: var(--border);
+            transition: background 0.2s;
+        }
+        
+        .lab-tab:last-child {
+            border-right: none;
+        }
+        
+        .lab-tab.active {
+            background-color: var(--neon);
+        }
+        
+        .lab-tab:not(.active):hover {
+            background-color: #f5f5f5;
+        }
+        
+        .lab-content {
+            flex: 1;
+            padding: var(--space-md);
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-sm);
+            align-content: flex-start;
+        }
+        
+        .accessory-item {
+            aspect-ratio: 1;
+            border: var(--border);
+            background: var(--off-white);
+            cursor: pointer;
+            transition: border-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        .accessory-item:hover {
+            border-color: var(--neon);
+            box-shadow: inset 0 0 0 1px var(--neon);
+        }
+        
+        .accessory-item.selected {
+            border-color: var(--neon);
+            box-shadow: inset 0 0 0 2px var(--neon);
+            background-color: #f9ffe0;
+        }
+        
+        .lab-panel-content.hidden {
+            display: none;
+        }
+        
+        .accessory-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .btn-lock {
+            width: 100%;
+            padding: var(--space-md);
+            background-color: var(--neon);
+            color: var(--black);
+            font-size: 1.5rem;
+            border-top: var(--border);
+            transition: opacity 0.2s;
+        }
+        
+        .btn-lock:hover {
+            opacity: 0.9;
+        }
+        
+        .community-section {
+            padding: var(--space-md);
+            border-bottom: var(--border);
+            background: var(--white);
+        }
+        
+        .community-header {
+            margin-bottom: var(--space-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        
+        .masonry-grid {
+            column-count: 4;
+            column-gap: var(--space-sm);
+        }
+        
+        .masonry-item {
+            break-inside: avoid;
+            margin-bottom: var(--space-sm);
+            border: var(--border);
+            position: relative;
+            overflow: hidden;
+            background: var(--black);
+        }
+        
+        .masonry-item img {
+            width: 100%;
+            display: block;
+            transition: opacity 0.3s;
+        }
+        
+        .masonry-hover {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .masonry-item:hover img {
+            opacity: 0.4;
+        }
+        
+        .masonry-item:hover .masonry-hover {
+            opacity: 1;
+        }
+        /* Share popup modal */
+        
+        .share-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .share-overlay.open {
+            display: flex;
+        }
+        
+        .share-popup {
+            background: var(--white);
+            border: var(--border);
+            width: 360px;
+            max-width: 94vw;
+            font-family: var(--font-system);
+            box-shadow: 8px 8px 0 var(--black);
+        }
+        
+        .share-popup-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            border-bottom: var(--border);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .share-popup-nav .logo {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+        
+        .share-popup-nav .nav-icons {
+            display: flex;
+            gap: 14px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .share-popup-title {
+            font-size: 2rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.03em;
+            line-height: 1;
+            padding: 14px 16px 10px;
+            border-bottom: var(--border);
+        }
+        
+        .share-popup-img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            display: block;
+            border-bottom: var(--border);
+        }
+        
+        .share-popup-steps {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            border-bottom: var(--border);
+        }
+        
+        .share-step {
+            padding: 12px 10px;
+            text-align: center;
+            border-right: var(--border);
+        }
+        
+        .share-step:last-child {
+            border-right: none;
+        }
+        
+        .share-step-icon {
+            font-size: 1.4rem;
+            margin-bottom: 4px;
+        }
+        
+        .share-step-num {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: block;
+        }
+        
+        .share-step-label {
+            font-size: 0.6rem;
+            color: #666;
+            display: block;
+        }
+        
+        .share-popup-cta {
+            width: 100%;
+            padding: 16px;
+            background: var(--neon);
+            color: var(--black);
+            font-weight: 800;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: var(--border);
+            transition: opacity 0.2s;
+        }
+        
+        .share-popup-cta:hover {
+            opacity: 0.85;
+        }
+        
+        .share-popup-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 16px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .share-popup-close {
+            position: absolute;
+            top: -14px;
+            right: -14px;
+            width: 28px;
+            height: 28px;
+            background: var(--black);
+            color: var(--white);
+            font-size: 0.9rem;
+            border: 2px solid var(--white);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        .share-popup-wrap {
+            position: relative;
+        }
+        
+        .btn-outline {
+            border: 1px solid var(--neon);
+            color: var(--neon);
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .btn-outline:hover {
+            background: var(--neon);
+            color: var(--black);
+        }
+        
+        .cart-toggle-input {
+            display: none;
+        }
+        
+        .cart-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 400px;
+            height: 100vh;
+            background: var(--white);
+            border-left: var(--border);
+            z-index: 200;
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .cart-toggle-input:checked~.cart-drawer {
+            transform: translateX(0);
+        }
+        
+        .cart-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        
+        .cart-toggle-input:checked~.cart-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        
+        .cart-header {
+            padding: var(--space-sm) var(--space-md);
+            border-bottom: var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .cart-close {
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-md);
+        }
+        
+        .cart-item {
+            display: flex;
+            gap: var(--space-sm);
+            margin-bottom: var(--space-md);
+        }
+        
+        .cart-item-img {
+            width: 80px;
+            height: 80px;
+            border: var(--border);
+            background: var(--off-white);
+        }
+        
+        .cart-item-details {
+            flex: 1;
+        }
+        
+        .cart-footer {
+            padding: var(--space-md);
+            border-top: var(--border);
+        }
+        
+        .vibe-check {
+            background: var(--neon);
+            padding: var(--space-xs);
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            border: var(--border);
+            margin-bottom: var(--space-sm);
+            display: none;
+        }
+        
+        .cart-label {
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .cart-label:hover {
+            color: var(--neon);
+            text-shadow: 0 0 1px var(--black);
+        }
+    </style>
+</head>
+
+<body vid="6">
+
+
+    <input type="checkbox" id="cart-toggle" class="cart-toggle-input" vid="7">
+    <label for="cart-toggle" class="cart-overlay" vid="8"></label>
+
+    <div class="grid-container" vid="9">
+
+
+        <header vid="10">
+            <div class="nav-inner" vid="11">
+                <div class="nav-col" vid="12">
+                    <a href="#" class="logo font-display" vid="13">SOLELUXE</a>
+                </div>
+                <div class="nav-col nav-center" vid="14">
+                    <nav class="nav-links" vid="15">
+                        <a href="#stage" class="nav-link" vid="16">Shop</a>
+                        <a href="#lab" class="nav-link" vid="17">The Lab</a>
+                        <a href="#community" class="nav-link" vid="18">Community</a>
+                    </nav>
+                </div>
+                <div class="nav-col nav-right" vid="19">
+                    <button class="nav-link" vid="20">Search</button>
+
+                    <label for="cart-toggle" class="cart-label" vid="21">Cart (2)</label>
+                </div>
+            </div>
+        </header>
+
+        <main vid="22">
+
+            <section id="stage" class="hero" vid="23">
+                <div class="hero-image-container" vid="24">
+                    <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&amp;w=2000&amp;auto=format&amp;fit=crop" alt="High energy sneaker" class="hero-image" vid="25">
+                </div>
+                <div class="hero-content" vid="26">
+                    <h1 class="hero-text font-display" vid="27">YOUR SHOES.<br vid="28">YOUR STORY.<br vid="29">YOUR MAIN CHARACTER MOMENT.</h1>
+                    <button class="btn-ghost" vid="30" onclick="document.getElementById('lab').scrollIntoView({behavior:'smooth',block:'start'})">Enter The Lab</button>
+                </div>
+            </section>
+
+            <div class="section-header font-display" vid="31">TRENDING NOW</div>
+            <section class="trending-grid" vid="32">
+
+                <div class="product-card" vid="33">
+                    <span class="tag" vid="34">NEW DROP</span>
+                    <div class="product-image-wrap" vid="35">
+                        <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&amp;w=600&amp;auto=format&amp;fit=crop" alt="Neon Laces" vid="36">
+                    </div>
+                    <div class="product-info font-body" vid="37">
+                        <span class="product-name" vid="38">Volt Laces</span>
+                        <span class="product-price" vid="39">$18</span>
+                    </div>
+                </div>
+
+                <div class="product-card" vid="40">
+                    <div class="product-image-wrap" vid="41">
+                        <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&amp;w=600&amp;auto=format&amp;fit=crop" alt="Metal Charm" vid="42">
+                    </div>
+                    <div class="product-info font-body" vid="43">
+                        <span class="product-name" vid="44">Chrome Butterfly Tag</span>
+                        <span class="product-price" vid="45">$24</span>
+                    </div>
+                </div>
+
+                <div class="product-card" vid="46">
+                    <span class="tag" style="background: var(--black); color: var(--neon);" vid="47">SOLD OUT</span>
+                    <div class="product-image-wrap" vid="48">
+                        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&amp;w=600&amp;auto=format&amp;fit=crop" alt="Thick Chain" vid="49">
+                    </div>
+                    <div class="product-info font-body" vid="50">
+                        <span class="product-name" vid="51">Cuban Link Heel Chain</span>
+                        <span class="product-price" vid="52">$45</span>
+                    </div>
+                </div>
+
+                <div class="product-card" vid="53">
+                    <div class="product-image-wrap" vid="54">
+                        <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&amp;w=600&amp;auto=format&amp;fit=crop" alt="Aglets" vid="55">
+                    </div>
+                    <div class="product-info font-body" vid="56">
+                        <span class="product-name" vid="57">Neon Aglet Set</span>
+                        <span class="product-price" vid="58">$12</span>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mission" vid="59">
+                <h2 class="mission-text font-display" style="font-weight: 300;" vid="60">Empowering self-expression, one step at a time.</h2>
+            </section>
+
+
+            <div class="section-header font-display" vid="61">THE SOLE LAB</div>
+            <section id="lab" class="lab-section" vid="62">
+                <div class="lab-canvas" vid="63">
+                    <span class="tag" style="position: absolute; top: var(--space-md); left: var(--space-md);" vid="64">BASE: AIR FORCE 1</span>
+                    <img id="canvas-shoe" src="assets/base.png" alt="White Sneaker Canvas" style="mix-blend-mode: multiply;" vid="65">
+                </div>
+                <div class="lab-panel" vid="66">
+                    <div class="lab-tabs" vid="67">
+                        <button class="lab-tab active" data-tab="laces" vid="68">Laces</button>
+                        <button class="lab-tab" data-tab="charms" vid="69">Charms</button>
+                        <button class="lab-tab" data-tab="chains" vid="70">Chains</button>
+                    </div>
+
+                    <!-- Laces Panel -->
+                    <div class="lab-content lab-panel-content" id="panel-laces" vid="71">
+                        <div class="accessory-item" data-img="assets/laceshoetie.png" vid="72"><img src="assets2/Lace.png" alt="Neon Lace"></div>
+                        <div class="accessory-item" data-img="assets/purpleshoetie.png" vid="74">
+                            <div style="width:60px;height:4px;background:#FF00FF;border-radius:2px;"></div>
+                        </div>
+                        <div class="accessory-item" data-img="assets/base.png" vid="76"><img src="assets2/Lace.png" alt="Black Lace"></div>
+                        <div class="accessory-item" data-img="assets/base.png" vid="72b">
+                            <div style="width:60px;height:4px;background:#fff;border-radius:2px;outline:1px solid #ccc;"></div>
+                        </div>
+                        <div class="accessory-item" data-img="assets/purpleshoetie.png" vid="74b"><img src="assets2/Lace.png" alt="Purple Lace"></div>
+                        <div class="accessory-item" data-img="assets/yellowshoetie.png" vid="76b">
+                            <div style="width:60px;height:4px;background:#FF6B00;border-radius:2px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Charms Panel -->
+                    <div class="lab-content lab-panel-content hidden" id="panel-charms">
+                        <div class="accessory-item" data-img="assets/pinkshoetie+star.png">
+                            <div style="font-size:1.6rem;line-height:1;">⭐</div>
+                        </div>
+                        <div class="accessory-item" data-img="assets/white+heart.png">
+                            <div style="font-size:1.6rem;line-height:1;">🖤</div>
+                        </div>
+                        <div class="accessory-item" data-img="assets/1fluffy.png"><img src="assets2/Fluffy.png" alt="Fluffy Charm"></div>
+                        <div class="accessory-item" data-img="assets/star.png"><img src="assets2/Untitled (2).png" alt="Charm"></div>
+                        <div class="accessory-item" data-img="assets/base.png"><img src="assets2/Untitled (4).png" alt="Charm"></div>
+                        <div class="accessory-item" data-img="assets/pinkshoetie+star.png">
+                            <div style="font-size:1.6rem;line-height:1;">💎</div>
+                        </div>
+                    </div>
+
+                    <!-- Chains Panel -->
+                    <div class="lab-content lab-panel-content hidden" id="panel-chains">
+                        <div class="accessory-item" data-img="assets/base-metal.png"><img src="assets2/Chain.png" alt="Silver Chain"></div>
+                        <div class="accessory-item" data-img="assets/yellowshoetie+metal chain.png">
+                            <div style="width:60px;height:8px;background:repeating-linear-gradient(90deg,#FFD700 0px,#FFD700 8px,transparent 8px,transparent 12px);border-radius:4px;"></div>
+                        </div>
+                        <div class="accessory-item" data-img="assets/purpleshoetie+pinkchain.png"><img src="assets2/Chain.png" alt="Pink Chain"></div>
+                        <div class="accessory-item" data-img="assets/base-metal.png">
+                            <div style="width:60px;height:10px;background:repeating-linear-gradient(90deg,#C0C0C0 0px,#C0C0C0 10px,transparent 10px,transparent 14px);border-radius:5px;"></div>
+                        </div>
+                        <div class="accessory-item" data-img="assets/yellowshoetie+metal chain.png"><img src="assets2/Chain.png" alt="Neon Chain"></div>
+                        <div class="accessory-item" data-img="assets/purpleshoetie+pinkchain.png">
+                            <div style="width:60px;height:8px;background:repeating-linear-gradient(90deg,#FF69B4 0px,#FF69B4 8px,transparent 8px,transparent 12px);border-radius:4px;"></div>
+                        </div>
+                    </div>
+                    <button class="btn-lock font-display" vid="84">LOCK THIS LOOK</button>
+                </div>
+            </section>
+
+
+            <section id="community" class="community-section" vid="85">
+                <div class="community-header" vid="86">
+                    <h2 class="font-display" style="font-size: 3rem; margin:0;" vid="87">THE FLEX FEED</h2>
+                    <span class="font-body" vid="88">@SOLELUXE #MAINCHARACTER</span>
+                </div>
+                <div class="masonry-grid" vid="89">
+                    <div class="masonry-item" vid="90">
+                        <img src="https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - neon laces" vid="91">
+                        <div class="masonry-hover" vid="92"><button class="btn-outline" vid="93">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="94">
+                        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - chunky chain" vid="95">
+                        <div class="masonry-hover" vid="96"><button class="btn-outline" vid="97">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="98">
+                        <img src="https://images.unsplash.com/photo-1520256862855-398228c41684?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - urban style" vid="99">
+                        <div class="masonry-hover" vid="100"><button class="btn-outline" vid="101">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="102">
+                        <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - white sneaker" vid="103">
+                        <div class="masonry-hover" vid="104"><button class="btn-outline" vid="105">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="106">
+                        <img src="https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - streetwear" vid="107">
+                        <div class="masonry-hover" vid="108"><button class="btn-outline" vid="109">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="110">
+                        <img src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - pink kicks" vid="111">
+                        <div class="masonry-hover" vid="112"><button class="btn-outline" vid="113">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="114">
+                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - lifestyle" vid="115">
+                        <div class="masonry-hover" vid="116"><button class="btn-outline" vid="117">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="118">
+                        <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - high energy" vid="119">
+                        <div class="masonry-hover" vid="120"><button class="btn-outline" vid="121">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="122">
+                        <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - accessory detail" vid="123">
+                        <div class="masonry-hover" vid="124"><button class="btn-outline" vid="125">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="126">
+                        <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - styled" vid="127">
+                        <div class="masonry-hover" vid="128"><button class="btn-outline" vid="129">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="130">
+                        <img src="https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - closeup" vid="131">
+                        <div class="masonry-hover" vid="132"><button class="btn-outline" vid="133">Get the Look</button></div>
+                    </div>
+                    <div class="masonry-item" vid="134">
+                        <img src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&amp;w=500&amp;auto=format&amp;fit=crop" alt="User flex - vibrant" vid="135">
+                        <div class="masonry-hover" vid="136"><button class="btn-outline" vid="137">Get the Look</button></div>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="category-nav-section" vid="138" style="border-bottom: var(--border); background: var(--white);">
+                <div class="category-grid" vid="139" style="display: grid; grid-template-columns: repeat(6, 1fr); border-bottom: var(--border);">
+                    <div class="category-item" vid="140" style="border-right: var(--border); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; transition: background 0.2s;">
+                        <span vid="141" style="font-size: 1.2rem;">→</span>
+                        <span vid="142" style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem;">All Women's</span>
+                    </div>
+                    <div class="category-item" vid="143" style="border-right: var(--border); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; transition: background 0.2s;">
+                        <span vid="144" style="font-size: 1.2rem;">→</span>
+                        <span vid="145" style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem;">All Men's</span>
+                    </div>
+                    <div class="category-item" vid="146" style="border-right: var(--border); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; transition: background 0.2s;">
+                        <span vid="147" style="font-size: 1.2rem;">→</span>
+                        <span vid="148" style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem;">All Kids'</span>
+                    </div>
+                    <div class="category-item" vid="149" style="border-right: var(--border); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; transition: background 0.2s;">
+                        <span vid="150" style="font-size: 1.2rem;">→</span>
+                        <span vid="151" style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem;">Charms Collection</span>
+                    </div>
+                    <div class="category-item" vid="152" style="border-right: var(--border); padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; transition: background 0.2s;">
+                        <span vid="153" style="font-size: 1.2rem;">→</span>
+                        <span vid="154" style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem;">Lace Lab</span>
+                    </div>
+                    <div class="category-item" vid="155" style="padding: var(--space-md); display: flex; align-items: center; gap: var(--space-sm); cursor: pointer; transition: background 0.2s;">
+                        <span vid="156" style="font-size: 1.2rem;">→</span>
+                        <span vid="157" style="font-weight: 600; text-transform: uppercase; font-size: 0.9rem;">Chain Gang</span>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="services-section" vid="158" style="border-bottom: var(--border); padding: var(--space-xl) var(--space-md); background: var(--white);">
+                <div class="services-grid" vid="159" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-lg); max-width: 1400px; margin: 0 auto;">
+                    <div class="service-item" vid="160" style="text-align: center;">
+                        <div class="service-icon" vid="161" style="margin-bottom: var(--space-sm); display: flex; justify-content: center;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M5 8h14l-1.5 9H6.5L5 8z"/>
+                                <path d="M3 5h18"/>
+                                <path d="M9 5V3h6v2"/>
+                                <path d="M10 12h4"/>
+                            </svg>
+                        </div>
+                        <h3 vid="162" style="font-weight: 600; font-size: 1.1rem; text-transform: uppercase; margin-bottom: var(--space-xs);">Fast, Free Shipping</h3>
+                        <p vid="163" style="font-size: 0.85rem; color: #666; line-height: 1.5;">Orders over $50 ship for free. Sign up for Soleluxe and get free shipping on every order.</p>
+                    </div>
+                    <div class="service-item" vid="165" style="text-align: center;">
+                        <div class="service-icon" vid="166" style="margin-bottom: var(--space-sm); display: flex; justify-content: center;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="1 4 1 10 7 10"/>
+                                <path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
+                            </svg>
+                        </div>
+                        <h3 vid="167" style="font-weight: 600; font-size: 1.1rem; text-transform: uppercase; margin-bottom: var(--space-xs);">Worry-Free Returns</h3>
+                        <p vid="168" style="font-size: 0.85rem; color: #666; line-height: 1.5;">Not vibing? Return or exchange your purchase for free within 30 days.</p>
+                    </div>
+                    <div class="service-item" vid="170" style="text-align: center;">
+                        <div class="service-icon" vid="171" style="margin-bottom: var(--space-sm); display: flex; justify-content: center;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 12 20 22 4 22 4 12"/>
+                                <rect x="2" y="7" width="20" height="5"/>
+                                <line x1="12" y1="22" x2="12" y2="7"/>
+                                <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                                <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                            </svg>
+                        </div>
+                        <h3 vid="172" style="font-weight: 600; font-size: 1.1rem; text-transform: uppercase; margin-bottom: var(--space-xs);">Soleluxe Gift Cards</h3>
+                        <p vid="173" style="font-size: 0.85rem; color: #666; line-height: 1.5;">Give them exactly what they want with a Soleluxe Gift Card.</p>
+                    </div>
+                    <div class="service-item" vid="175" style="text-align: center;">
+                        <div class="service-icon" vid="176" style="margin-bottom: var(--space-sm); display: flex; justify-content: center; gap: 10px;">
+                            <!-- Instagram -->
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                                <circle cx="12" cy="12" r="4"/>
+                                <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                            </svg>
+                            <!-- TikTok -->
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.82 1.55V6.8a4.85 4.85 0 0 1-1.05-.11z"/>
+                            </svg>
+                        </div>
+                        <h3 vid="177" style="font-weight: 600; font-size: 1.1rem; text-transform: uppercase; margin-bottom: var(--space-xs);">Follow Us</h3>
+                        <p vid="178" style="font-size: 0.85rem; color: #666; line-height: 1.5;">Keep up with the latest Soleluxe news on our social channels.</p>
+                    </div>
+                </div>
+            </section>
+
+
+            <section class="reviews-section" vid="184" style="border-bottom: var(--border); padding: var(--space-xl) var(--space-md); background: var(--off-white);">
+                <div class="reviews-header" vid="185" style="text-align: center; margin-bottom: var(--space-lg);">
+                    <h2 vid="186" style="font-size: 2rem; font-weight: 300; margin-bottom: var(--space-xs);">Words from our community</h2>
+                    <p vid="187" style="color: var(--neon); font-weight: 600;">from 2,847 reviews</p>
+                </div>
+                <div class="reviews-grid" vid="188" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-md); max-width: 1400px; margin: 0 auto;">
+                    <div class="review-card" vid="189" style="background: var(--white); border: var(--border); padding: var(--space-md); transition: border-color 0.2s;">
+                        <div class="review-image" vid="190" style="aspect-ratio: 1; background: #f0f0f0; margin-bottom: var(--space-sm); border: var(--border);">
+                            <img src="https://images.unsplash.com/photo-1511556532299-8f662fc26c06?q=80&amp;w=400&amp;auto=format&amp;fit=crop" alt="Review" vid="191" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="stars" vid="192" style="color: var(--black); font-size: 1.2rem; margin-bottom: var(--space-xs);">★★★★★</div>
+                        <div class="reviewer" vid="193" style="font-weight: 600; margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs);">
+                            <span vid="194">Alex Chen</span>
+                            <span class="verified" vid="195" style="background: var(--black); color: var(--white); padding: 2px 8px; font-size: 0.7rem; text-transform: uppercase;">Verified</span>
+                        </div>
+                        <p class="review-title" vid="196" style="font-weight: 600; font-size: 0.9rem; margin-bottom: var(--space-xs);">Changed my shoe game</p>
+                        <p class="review-text" vid="197" style="font-size: 0.85rem; color: #666; line-height: 1.5;">The charms are so durable and easy to attach. My sneakers went from basic to main character energy instantly.</p>
+                    </div>
+                    <div class="review-card" vid="198" style="background: var(--white); border: var(--border); padding: var(--space-md); transition: border-color 0.2s;">
+                        <div class="review-image" vid="199" style="aspect-ratio: 1; background: #f0f0f0; margin-bottom: var(--space-sm); border: var(--border);">
+                            <img src="https://images.unsplash.com/photo-1560769629-975ec94e6a86?q=80&amp;w=400&amp;auto=format&amp;fit=crop" alt="Review" vid="200" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="stars" vid="201" style="color: var(--black); font-size: 1.2rem; margin-bottom: var(--space-xs);">★★★★★</div>
+                        <div class="reviewer" vid="202" style="font-weight: 600; margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs);">
+                            <span vid="203">Maya Johnson</span>
+                            <span class="verified" vid="204" style="background: var(--black); color: var(--white); padding: 2px 8px; font-size: 0.7rem; text-transform: uppercase;">Verified</span>
+                        </div>
+                        <p class="review-title" vid="205" style="font-weight: 600; font-size: 0.9rem; margin-bottom: var(--space-xs);">Perfect everyday laces</p>
+                        <p class="review-text" vid="206" style="font-size: 0.85rem; color: #666; line-height: 1.5;">The neon laces are fire. I've never bought the same set twice but I'm buying more of these.</p>
+                    </div>
+                    <div class="review-card" vid="207" style="background: var(--white); border: var(--border); padding: var(--space-md); transition: border-color 0.2s;">
+                        <div class="review-image" vid="208" style="aspect-ratio: 1; background: #f0f0f0; margin-bottom: var(--space-sm); border: var(--border);">
+                            <img src="https://images.unsplash.com/photo-1603487742131-4160ec999306?q=80&amp;w=400&amp;auto=format&amp;fit=crop" alt="Review" vid="209" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="stars" vid="210" style="color: var(--black); font-size: 1.2rem; margin-bottom: var(--space-xs);">★★★★★</div>
+                        <div class="reviewer" vid="211" style="font-weight: 600; margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs);">
+                            <span vid="212">Jordan Smith</span>
+                            <span class="verified" vid="213" style="background: var(--black); color: var(--white); padding: 2px 8px; font-size: 0.7rem; text-transform: uppercase;">Verified</span>
+                        </div>
+                        <p class="review-title" vid="214" style="font-weight: 600; font-size: 0.9rem; margin-bottom: var(--space-xs);">Butterfly chains hit different</p>
+                        <p class="review-text" vid="215" style="font-size: 0.85rem; color: #666; line-height: 1.5;">OMG such a good accessory! Its stayed on for so long and the color is very vibrant!</p>
+                    </div>
+                    <div class="review-card" vid="216" style="background: var(--white); border: var(--border); padding: var(--space-md); transition: border-color 0.2s;">
+                        <div class="review-image" vid="217" style="aspect-ratio: 1; background: #f0f0f0; margin-bottom: var(--space-sm); border: var(--border);">
+                            <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&amp;w=400&amp;auto=format&amp;fit=crop" alt="Review" vid="218" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="stars" vid="219" style="color: var(--black); font-size: 1.2rem; margin-bottom: var(--space-xs);">★★★★★</div>
+                        <div class="reviewer" vid="220" style="font-weight: 600; margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs);">
+                            <span vid="221">Taylor R.</span>
+                        </div>
+                        <p class="review-title" vid="222" style="font-weight: 600; font-size: 0.9rem; margin-bottom: var(--space-xs);">So fun cant wait to wear them</p>
+                        <p class="review-text" vid="223" style="font-size: 0.85rem; color: #666; line-height: 1.5;">Shipping took a while but I assume the demand was high when I ordered. Worth the wait!</p>
+                    </div>
+                    <div class="review-card" vid="224" style="background: var(--white); border: var(--border); padding: var(--space-md); transition: border-color 0.2s;">
+                        <div class="review-image" vid="225" style="aspect-ratio: 1; background: #f0f0f0; margin-bottom: var(--space-sm); border: var(--border);">
+                            <img src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?q=80&amp;w=400&amp;auto=format&amp;fit=crop" alt="Review" vid="226" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="stars" vid="227" style="color: var(--black); font-size: 1.2rem; margin-bottom: var(--space-xs);">★★★★★</div>
+                        <div class="reviewer" vid="228" style="font-weight: 600; margin-bottom: var(--space-xs); display: flex; align-items: center; gap: var(--space-xs);">
+                            <span vid="229">Samantha K.</span>
+                            <span class="verified" vid="230" style="background: var(--black); color: var(--white); padding: 2px 8px; font-size: 0.7rem; text-transform: uppercase;">Verified</span>
+                        </div>
+                        <p class="review-title" vid="231" style="font-weight: 600; font-size: 0.9rem; margin-bottom: var(--space-xs);">Really cute!</p>
+                        <p class="review-text" vid="232" style="font-size: 0.85rem; color: #666; line-height: 1.5;">The Sole Lab experience is amazing. I designed my perfect combo and the quality is top tier.</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+
+    <aside class="cart-drawer" vid="328">
+        <div class="cart-header" vid="329">
+            <h3 class="font-display" style="font-size: 1.5rem;" vid="330">YOUR LAB LOADOUT</h3>
+            <label for="cart-toggle" class="cart-close" vid="331">×</label>
+        </div>
+
+        <div class="vibe-check" id="vibe-msg" vid="332">VIBE CHECK PASSED. SECURING BAG.</div>
+
+        <div class="cart-items font-body" vid="333">
+            <div class="cart-item" vid="334" data-unit-price="18">
+                <div class="cart-item-img" vid="335" style="flex-shrink:0; overflow:hidden;">
+                    <img src="assets2/Lace.png" alt="Volt Laces" style="width:100%;height:100%;object-fit:contain;">
+                </div>
+                <div class="cart-item-details" vid="336">
+                    <div class="product-name" vid="337">Volt Laces</div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                        <button class="qty-btn" onclick="updateQty(this,-1)" style="width:24px;height:24px;border:var(--border);background:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">−</button>
+                        <span class="qty-val" style="font-size:0.85rem;font-weight:600;min-width:16px;text-align:center;">1</span>
+                        <button class="qty-btn" onclick="updateQty(this,1)" style="width:24px;height:24px;border:var(--border);background:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
+                    </div>
+                    <div class="cart-item-price product-price" style="margin-top:5px;">$18.00</div>
+                </div>
+            </div>
+            <div class="cart-item" vid="340" data-unit-price="24">
+                <div class="cart-item-img" vid="341" style="flex-shrink:0; overflow:hidden;">
+                    <img src="assets/1fluffy.png" alt="Chrome Butterfly Tag" style="width:100%;height:100%;object-fit:contain;">
+                </div>
+                <div class="cart-item-details" vid="342">
+                    <div class="product-name" vid="343">Chrome Butterfly Tag</div>
+                    <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+                        <button class="qty-btn" onclick="updateQty(this,-1)" style="width:24px;height:24px;border:var(--border);background:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">−</button>
+                        <span class="qty-val" style="font-size:0.85rem;font-weight:600;min-width:16px;text-align:center;">2</span>
+                        <button class="qty-btn" onclick="updateQty(this,1)" style="width:24px;height:24px;border:var(--border);background:var(--white);font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">+</button>
+                    </div>
+                    <div class="cart-item-price product-price" style="margin-top:5px;">$48.00</div>
+                </div>
+            </div>
+        </div>
+        <div class="cart-footer" vid="346">
+            <div style="display: flex; justify-content: space-between; margin-bottom: var(--space-sm); font-weight: 600;" vid="347">
+                <span vid="348">TOTAL</span>
+                <span id="cart-total">$66.00</span>
+            </div>
+            <button class="btn-lock font-display" style="font-size: 1.2rem; padding: 1rem;" onclick="document.getElementById('vibe-msg').style.display='block'" vid="350">CHECKOUT</button>
+        </div>
+    </aside>
+
+
+
+    <!-- Share Your Look Popup -->
+    <div class="share-overlay" id="share-overlay">
+        <div class="share-popup-wrap">
+            <button class="share-popup-close" id="share-close">✕</button>
+            <div class="share-popup">
+                <div class="share-popup-nav">
+                    <span class="logo">SOLELUXE</span>
+                    <div class="nav-icons">
+                        <span>👤</span>
+                    </div>
+                </div>
+                <div class="share-popup-title">SHARE YOUR LOOK</div>
+                <img class="share-popup-img" id="share-img" src="" alt="Your Look">
+                <div class="share-popup-steps">
+                    <div class="share-step">
+                        <div class="share-step-icon">
+                            <!-- Instagram icon -->
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                            <circle cx="12" cy="12" r="4"/>
+                            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+                        </svg>
+                        </div>
+                        <span class="share-step-num">1. OPEN INS</span>
+                        <span class="share-step-label">Post on Ins</span>
+                    </div>
+                    <div class="share-step">
+                        <div class="share-step-icon">
+                            <!-- Share / Upload icon -->
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <polyline points="8 12 12 8 16 12"/>
+                            <line x1="12" y1="8" x2="12" y2="17"/>
+                        </svg>
+                        </div>
+                        <span class="share-step-num">2. ADD IMAGE</span>
+                        <span class="share-step-label">Crop and Filter</span>
+                    </div>
+                    <div class="share-step" style="background: var(--neon);">
+                        <div class="share-step-icon">
+                            <!-- TikTok icon -->
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.34 6.34 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.82 1.55V6.8a4.85 4.85 0 0 1-1.05-.11z"/>
+                        </svg>
+                        </div>
+                        <span class="share-step-num">3. TIKTOK REEL</span>
+                        <span class="share-step-label">Vibe and Music</span>
+                    </div>
+                </div>
+                <button class="share-popup-cta">POST ON INS</button>
+                <div class="share-popup-footer">
+                    <span>⊙ ♪ &nbsp; Follow us @SOLELUXE | #SOLELUXELAB</span>
+                    <span style="font-size:1rem;">♪</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Cart quantity
+        function updateQty(btn, delta) {
+            var item = btn.closest('.cart-item');
+            var qtyEl = item.querySelector('.qty-val');
+            var priceEl = item.querySelector('.cart-item-price');
+            var unitPrice = parseFloat(item.dataset.unitPrice);
+            var qty = parseInt(qtyEl.textContent) + delta;
+            if (qty < 1) qty = 1;
+            qtyEl.textContent = qty;
+            priceEl.textContent = '$' + (unitPrice * qty).toFixed(2);
+            // Recalculate total
+            var total = 0;
+            document.querySelectorAll('.cart-item').forEach(function(ci) {
+                var p = parseFloat(ci.querySelector('.cart-item-price').textContent.replace('$', ''));
+                total += p;
+            });
+            document.getElementById('cart-total').textContent = '$' + total.toFixed(2);
+        }
+
+        // Tab switching
+        var canvasImgRef = document.getElementById('canvas-shoe');
+        document.querySelectorAll('.lab-tab').forEach(function(tab) {
+            tab.addEventListener('click', function() {
+                var target = this.dataset.tab;
+
+                document.querySelectorAll('.lab-tab').forEach(function(t) {
+                    t.classList.remove('active');
+                });
+                document.querySelectorAll('.lab-panel-content').forEach(function(p) {
+                    p.classList.add('hidden');
+                });
+
+                this.classList.add('active');
+                var panel = document.getElementById('panel-' + target);
+                panel.classList.remove('hidden');
+
+                // Swap canvas to the selected item in this panel, or base image if nothing selected
+                var selected = panel.querySelector('.accessory-item.selected');
+                var src = selected ? selected.dataset.img : 'assets/base.png';
+                if (canvasImgRef) {
+                    canvasImgRef.style.opacity = '0';
+                    canvasImgRef.style.transition = 'opacity 0.2s';
+                    setTimeout(function() {
+                        canvasImgRef.src = src;
+                        canvasImgRef.style.opacity = '1';
+                    }, 200);
+                }
+            });
+        });
+
+        // Share popup
+        var shareOverlay = document.getElementById('share-overlay');
+        var shareImg = document.getElementById('share-img');
+        var canvasShoe = document.getElementById('canvas-shoe');
+        var flexFeedActiveSrc = null; // tracks whether a flex feed image has been picked
+
+        // Get the Look → change canvas image only
+        document.querySelectorAll('.masonry-item').forEach(function(item) {
+            var btn = item.querySelector('.btn-outline');
+            var img = item.querySelector('img');
+            if (btn && img) {
+                btn.addEventListener('click', function() {
+                    var src = img.src;
+                    canvasShoe.style.opacity = '0';
+                    canvasShoe.style.transition = 'opacity 0.2s';
+                    canvasShoe.style.objectFit = 'cover';
+                    setTimeout(function() {
+                        canvasShoe.src = src;
+                        canvasShoe.style.opacity = '1';
+                    }, 200);
+                    flexFeedActiveSrc = src;
+
+                    // Scroll up to THE SOLE LAB
+                    document.getElementById('lab').scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                });
+            }
+        });
+
+        // Lock This Look → open popup
+        document.querySelectorAll('.btn-lock').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                shareImg.src = flexFeedActiveSrc || '4.png';
+                shareImg.style.objectFit = flexFeedActiveSrc ? 'cover' : 'contain';
+                shareOverlay.classList.add('open');
+            });
+        });
+
+        document.getElementById('share-close').addEventListener('click', function() {
+            shareOverlay.classList.remove('open');
+        });
+
+        shareOverlay.addEventListener('click', function(e) {
+            if (e.target === shareOverlay) shareOverlay.classList.remove('open');
+        });
+
+        // Item selection within each panel + canvas image swap
+        var canvasImg = document.getElementById('canvas-shoe');
+        document.querySelectorAll('.accessory-item').forEach(function(item) {
+            item.addEventListener('click', function() {
+                var panel = this.closest('.lab-panel-content');
+                panel.querySelectorAll('.accessory-item').forEach(function(i) {
+                    i.classList.remove('selected');
+                });
+                this.classList.add('selected');
+
+                var imgSrc = this.dataset.img;
+                if (imgSrc && canvasImg) {
+                    canvasImg.style.opacity = '0';
+                    canvasImg.style.transition = 'opacity 0.2s';
+                    setTimeout(function() {
+                        canvasImg.src = imgSrc;
+                        canvasImg.style.objectFit = 'contain';
+                        canvasImg.style.opacity = '1';
+                    }, 200);
+                    flexFeedActiveSrc = null; // reset flex feed selection when a lab item is picked
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
